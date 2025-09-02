@@ -31,62 +31,100 @@ const AppRoutes = () => {
 
   return (
     <RouterRoutes>
-      {/* Public routes */}
+      {/* Field Billing - Always available (public with password) */}
       <Route path="/field-billing" element={<FieldBillingPage />} />
       
       {/* Protected routes - require admin login */}
-      {isAuthenticated ? (
-        <>
-          <Route path="/" element={
-            <ProtectedRoute requireAuth={true}>
-              <AdministrativeDashboard />
-            </ProtectedRoute>
-          } />
-          <Route path="/administrative-dashboard" element={
-            <ProtectedRoute requireAuth={true}>
-              <AdministrativeDashboard />
-            </ProtectedRoute>
-          } />
-          <Route path="/customers" element={
-            <ProtectedRoute requireAuth={true}>
-              <CustomersPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/billing" element={
-            <ProtectedRoute requireAuth={true}>
-              <BillingPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/cash-management" element={
-            <ProtectedRoute requireAuth={true}>
-              <CashManagementPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/reports" element={
-            <ProtectedRoute requireAuth={true}>
-              <ReportsPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/equipment" element={
-            <ProtectedRoute requireAuth={true}>
-              <EquipmentPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/whatsapp-settings" element={
-            <ProtectedRoute requireAuth={true}>
-              <WhatsAppSettingsPage />
-            </ProtectedRoute>
-          } />
-          <Route path="*" element={
-            <ProtectedRoute requireAuth={true}>
-              <NotFound />
-            </ProtectedRoute>
-          } />
-        </>
-      ) : (
-        // If not authenticated, show login for all protected routes
-        <Route path="*" element={<LoginPage />} />
-      )}
+      <Route path="/" element={
+        isAuthenticated ? (
+          <ProtectedRoute requireAuth={true}>
+            <AdministrativeDashboard />
+          </ProtectedRoute>
+        ) : (
+          <LoginPage />
+        )
+      } />
+      
+      <Route path="/administrative-dashboard" element={
+        isAuthenticated ? (
+          <ProtectedRoute requireAuth={true}>
+            <AdministrativeDashboard />
+          </ProtectedRoute>
+        ) : (
+          <LoginPage />
+        )
+      } />
+      
+      <Route path="/customers" element={
+        isAuthenticated ? (
+          <ProtectedRoute requireAuth={true}>
+            <CustomersPage />
+          </ProtectedRoute>
+        ) : (
+          <LoginPage />
+        )
+      } />
+      
+      <Route path="/billing" element={
+        isAuthenticated ? (
+          <ProtectedRoute requireAuth={true}>
+            <BillingPage />
+          </ProtectedRoute>
+        ) : (
+          <LoginPage />
+        )
+      } />
+      
+      <Route path="/cash-management" element={
+        isAuthenticated ? (
+          <ProtectedRoute requireAuth={true}>
+            <CashManagementPage />
+          </ProtectedRoute>
+        ) : (
+          <LoginPage />
+        )
+      } />
+      
+      <Route path="/reports" element={
+        isAuthenticated ? (
+          <ProtectedRoute requireAuth={true}>
+            <ReportsPage />
+          </ProtectedRoute>
+        ) : (
+          <LoginPage />
+        )
+      } />
+      
+      <Route path="/equipment" element={
+        isAuthenticated ? (
+          <ProtectedRoute requireAuth={true}>
+            <EquipmentPage />
+          </ProtectedRoute>
+        ) : (
+          <LoginPage />
+        )
+      } />
+      
+      <Route path="/whatsapp-settings" element={
+        isAuthenticated ? (
+          <ProtectedRoute requireAuth={true}>
+            <WhatsAppSettingsPage />
+          </ProtectedRoute>
+        ) : (
+          <LoginPage />
+        )
+      } />
+      
+      {/* Catch all route */}
+      <Route path="*" element={
+        isAuthenticated ? (
+          <ProtectedRoute requireAuth={true}>
+            <NotFound />
+          </ProtectedRoute>
+        ) : (
+          <LoginPage />
+        )
+      } />
     </RouterRoutes>
   );
 };
