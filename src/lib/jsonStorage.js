@@ -10,6 +10,8 @@ class JSONStorage {
   // Initialize storage with default structure
   initializeStorage() {
     const data = this.getAllData()
+    const isFirstTime = !data.customers && !data.packages && !data.bills
+    
     if (!data.customers) data.customers = []
     if (!data.packages) {
       data.packages = this.getDefaultPackages()
@@ -20,6 +22,13 @@ class JSONStorage {
     if (!data.bills) data.bills = []
     if (!data.payments) data.payments = []
     if (!data.billing_history) data.billing_history = []
+    
+    // Load sample data on first time
+    if (isFirstTime) {
+      console.log('First time initialization - loading sample data...')
+      data.customers = this.getDefaultCustomers()
+    }
+    
     this.saveAllData(data)
   }
 
@@ -81,6 +90,49 @@ class JSONStorage {
         description: 'Paket untuk pelanggan yang putus layanan, hanya menagih hutang tanpa biaya bulanan',
         is_active: true,
         created_at: new Date().toISOString()
+      }
+    ]
+  }
+
+  // Get default customers for first time initialization
+  getDefaultCustomers() {
+    const now = new Date().toISOString()
+    return [
+      {
+        id: 1,
+        name: 'Budi Santoso',
+        email: 'budi@email.com',
+        phone: '081234567890',
+        address: 'Jl. Merdeka No. 123, Jakarta',
+        package_name: 'Standard',
+        package_speed: '20 Mbps',
+        monthly_fee: 150000,
+        status: 'active',
+        created_at: now
+      },
+      {
+        id: 2,
+        name: 'Siti Nurhaliza',
+        email: 'siti@email.com',
+        phone: '081234567891',
+        address: 'Jl. Sudirman No. 456, Bandung',
+        package_name: 'Premium',
+        package_speed: '50 Mbps',
+        monthly_fee: 200000,
+        status: 'active',
+        created_at: now
+      },
+      {
+        id: 3,
+        name: 'Ahmad Rahman',
+        email: 'ahmad@email.com',
+        phone: '081234567892',
+        address: 'Jl. Gatot Subroto No. 789, Surabaya',
+        package_name: 'Basic',
+        package_speed: '10 Mbps',
+        monthly_fee: 100000,
+        status: 'active',
+        created_at: now
       }
     ]
   }
