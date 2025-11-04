@@ -43,7 +43,7 @@ class NeonStorage {
       const result = await this.sql`
         INSERT INTO customers (
           name, email, phone, address, 
-          package_name, package_speed, monthly_fee, status
+          package_name, package_speed, monthly_fee, hutang, status
         )
         VALUES (
           ${customerData.name},
@@ -53,6 +53,7 @@ class NeonStorage {
           ${customerData.package_name},
           ${customerData.package_speed},
           ${customerData.monthly_fee},
+          ${customerData.hutang || 0},
           ${customerData.status || 'active'}
         )
         RETURNING *
@@ -76,6 +77,7 @@ class NeonStorage {
           package_name = ${customerData.package_name},
           package_speed = ${customerData.package_speed},
           monthly_fee = ${customerData.monthly_fee},
+          hutang = ${customerData.hutang !== undefined ? customerData.hutang : 0},
           status = ${customerData.status},
           updated_at = CURRENT_TIMESTAMP
         WHERE id = ${id}
