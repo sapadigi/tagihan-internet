@@ -59,7 +59,9 @@
   "scripts": {
     "start": "vite",
     "build": "vite build --sourcemap",
-    "serve": "vite preview"
+    "serve": "vite preview",
+    "setup:neon": "node scripts/setup-neon.js",
+    "dev": "vite"
   },
   "eslintConfig": {
     "extends": [

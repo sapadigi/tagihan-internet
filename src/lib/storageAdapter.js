@@ -2,14 +2,21 @@
 import jsonStorage, { TABLES } from './jsonStorage'
 import neonStorage from './neonStorage'
 
-const USE_NEON = import.meta.env.VITE_DATABASE_URL ? true : false
+// TEMPORARY: Force using Neon for testing
+// TODO: Change back to: const USE_NEON = import.meta.env.VITE_DATABASE_URL ? true : false
+const USE_NEON = true // Force Neon mode
 
-console.log('Storage Mode:', USE_NEON ? 'Neon PostgreSQL' : 'LocalStorage')
+console.log('=== Storage Adapter Debug ===')
+console.log('VITE_DATABASE_URL:', import.meta.env.VITE_DATABASE_URL ? '✅ FOUND' : '❌ NOT FOUND')
+console.log('USE_NEON:', USE_NEON)
+console.log('Storage Mode:', USE_NEON ? '🔵 Neon PostgreSQL' : '🟡 LocalStorage')
+console.log('============================')
 
 // Create adapter that wraps both storages
 const storageAdapter = {
   // Customer methods
   async getCustomers(filters = {}) {
+    console.log('🔶 storageAdapter.getCustomers() called, USE_NEON:', USE_NEON)
     if (USE_NEON) {
       return await neonStorage.getCustomers()
     } else {

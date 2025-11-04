@@ -3,24 +3,35 @@ import { neon } from '@neondatabase/serverless';
 
 class NeonStorage {
   constructor() {
-    const dbUrl = import.meta.env.VITE_DATABASE_URL;
+    // Get database URL from environment or use hardcoded for development
+    const dbUrl = import.meta.env.VITE_DATABASE_URL || 
+                 'postgresql://neondb_owner:npg_jaoNX63yHqiw@ep-flat-rain-adxuna30-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require';
+    
+    console.log('🔵 NeonStorage initializing...');
+    console.log('🔵 Database URL:', dbUrl ? 'Connected' : 'NOT FOUND');
+    
     if (!dbUrl) {
       throw new Error('VITE_DATABASE_URL is not defined in environment variables');
     }
+    
     this.sql = neon(dbUrl);
+    console.log('✅ NeonStorage initialized successfully');
   }
 
   // ==================== CUSTOMERS ====================
   
   async getCustomers() {
     try {
+      console.log('🔵 neonStorage.getCustomers() called')
       const customers = await this.sql`
         SELECT * FROM customers 
         ORDER BY created_at DESC
       `;
+      console.log('🔵 Found', customers?.length, 'customers from Neon')
+      console.log('🔵 Sample customer:', customers?.[0])
       return { data: customers, error: null };
     } catch (error) {
-      console.error('Error getting customers:', error);
+      console.error('❌ Error getting customers:', error);
       return { data: null, error: error.message };
     }
   }
@@ -176,15 +187,32 @@ class NeonStorage {
   
   async getBills(filters = {}) {
     try {
+      console.log('🔵 neonStorage.getBills() called with filters:', filters)
+      
       // Use SQL JOIN to get customer data with bills
       let query = `
         SELECT 
-          bills.*,
-          customers.name as customer_name,
-          customers.phone as customer_phone,
-          customers.email as customer_email,
+          bills.id,
+          bills.bill_number,
+          bills.customer_id,
+          bills.customer_name,
+          bills.billing_month,
+          bills.billing_year,
+          bills.amount,
+          bills.previous_debt,
+          bills.total_amount,
+          bills.status,
+          bills.due_date,
+          bills.created_at,
+          customers.name,
+          customers.phone,
+          customers.email,
+          customers.address,
           customers.package_name,
-          customers.hutang as customer_hutang
+          customers.package_speed,
+          customers.monthly_fee,
+          customers.hutang,
+          customers.status as customer_status
         FROM bills
         LEFT JOIN customers ON bills.customer_id = customers.id
         WHERE 1=1
@@ -211,18 +239,57 @@ class NeonStorage {
         params.push(filters.billing_year);
       }
 
-      query += ' ORDER BY created_at DESC';
+      query += ' ORDER BY bills.created_at DESC';
 
-      const bills = await this.sql(query, params);
+      console.log('🔵 Executing query:', query)
+      console.log('🔵 With params:', params)
+
+      // Use sql.query() for dynamic queries with parameters
+      const result = await this.sql.query(query, params);
+      
+      // Transform data to match localStorage format with nested customers object
+      const bills = result.map(row => ({
+        id: row.id,
+        bill_number: row.bill_number,
+        customer_id: row.customer_id,
+        customer_name: row.customer_name,
+        billing_month: row.billing_month,
+        billing_year: row.billing_year,
+        amount: row.amount,
+        previous_debt: row.previous_debt,
+        total_amount: row.total_amount,
+        status: row.status,
+        due_date: row.due_date,
+        created_at: row.created_at,
+        // Nest customer data in 'customers' object for compatibility
+        customers: row.name ? {
+          id: row.customer_id,
+          name: row.name,
+          phone: row.phone,
+          email: row.email,
+          address: row.address,
+          package_name: row.package_name,
+          package_speed: row.package_speed,
+          monthly_fee: row.monthly_fee,
+          hutang: row.hutang,
+          status: row.customer_status
+        } : null
+      }));
+      
+      console.log('🔵 Query result:', bills?.length, 'bills found')
+      console.log('🔵 First bill sample:', bills?.[0])
+      
       return { data: bills, error: null };
     } catch (error) {
-      console.error('Error getting bills:', error);
+      console.error('❌ Error getting bills:', error);
       return { data: null, error: error.message };
     }
   }
 
   async createBill(billData) {
     try {
+      console.log('🔵 neonStorage.createBill() called for:', billData.bill_number)
+      
       const result = await this.sql`
         INSERT INTO bills (
           bill_number, customer_id, customer_name,
@@ -243,6 +310,8 @@ class NeonStorage {
         )
         RETURNING *
       `;
+      
+      console.log('🔵 Bill created successfully:', result[0]?.bill_number)
       return { data: result[0], error: null };
     } catch (error) {
       console.error('Error creating bill:', error);

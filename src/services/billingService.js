@@ -81,100 +81,131 @@ export const billingService = {
       const billingDate = new Date(billingMonth)
       const year = billingDate.getFullYear()
       const month = billingDate.getMonth()
+      const monthName = billingDate.toLocaleString('id-ID', { month: 'long' })
+      
+      console.log('📋 Generating bills for:', monthName, year)
       
       // Calculate billing period
-      const billingPeriodStart = new Date(year, month, 1)
-      const billingPeriodEnd = new Date(year, month + 1, 0)
       const dueDate = new Date(year, month + 1, 0) // End of the month
 
-      // Get all active customers
-      const customers = jsonStorage.select(TABLES.CUSTOMERS, {
-        filters: { status: 'active' }
-      })
+      // Get all active customers using storageAdapter
+      const { data: customers, error: customersError } = await storageAdapter.getCustomers()
+      
+      if (customersError) {
+        throw new Error(`Failed to get customers: ${customersError}`)
+      }
 
-      if (!customers || customers.length === 0) {
+      const activeCustomers = customers?.filter(c => c.status === 'active') || []
+
+      if (activeCustomers.length === 0) {
         return { data: { message: 'No active customers found' }, error: null }
       }
 
+      console.log('👥 Found', activeCustomers.length, 'active customers')
+
       // Check if bills already exist for this month
-      const existingBills = jsonStorage.select(TABLES.BILLS, {
-        filters: { 
-          billing_period_start: billingPeriodStart.toISOString().split('T')[0] 
-        }
+      const { data: existingBills } = await storageAdapter.getBills({
+        billing_month: monthName,
+        billing_year: year
       })
 
-      const existingCustomerIds = existingBills.map(bill => bill.customer_id)
-      const customersToProcess = customers.filter(customer => 
+      const existingCustomerIds = existingBills?.map(bill => bill.customer_id) || []
+      const customersToProcess = activeCustomers.filter(customer => 
         !existingCustomerIds.includes(customer.id)
       )
 
       if (customersToProcess.length === 0) {
-        return { data: { message: 'Bills already generated for this month' }, error: null }
+        return { 
+          data: { 
+            message: `Bills already generated for ${monthName} ${year}`,
+            existingCount: existingBills?.length || 0
+          }, 
+          error: null 
+        }
       }
 
-      // Get previous month's unpaid bills for debt calculation
-      const prevMonth = new Date(year, month - 1, 1)
-      const unpaidBills = jsonStorage.select(TABLES.BILLS, {
-        filters: { 
-          billing_period_start: prevMonth.toISOString().split('T')[0]
-        }
-      }).filter(bill => bill.remaining_amount > 0)
-
-      const debtMap = {}
-      unpaidBills.forEach(bill => {
-        debtMap[bill.customer_id] = bill.remaining_amount
-      })
+      console.log('✅ Will generate bills for', customersToProcess.length, 'customers')
 
       // Get all existing bills to generate unique bill numbers
-      const allExistingBills = jsonStorage.select(TABLES.BILLS)
+      const { data: allExistingBills } = await storageAdapter.getBills()
 
       // Generate bills
       const billsToCreate = []
       let totalAmount = 0
 
       for (const customer of customersToProcess) {
-        const previousDebt = debtMap[customer.id] || 0
+        // Previous debt comes from customer.hutang field
+        const previousDebt = customer.hutang || 0
         const monthlyFee = customer.monthly_fee || 0
         const totalBillAmount = monthlyFee + previousDebt
 
-        // Generate bill number
-        const billNumber = this.generateBillNumber(billingPeriodStart, allExistingBills)
+        // Generate bill number - update allExistingBills array to prevent duplicates
+        const billNumber = this.generateBillNumber(billingDate, allExistingBills || [])
+        
+        // Add to existing bills list immediately to prevent duplicates in next iteration
+        if (allExistingBills) {
+          allExistingBills.push({ bill_number: billNumber })
+        }
 
-        billsToCreate.push({
+        const billData = {
           bill_number: billNumber,
           customer_id: customer.id,
-          billing_period_start: billingPeriodStart.toISOString().split('T')[0],
-          billing_period_end: billingPeriodEnd.toISOString().split('T')[0],
+          customer_name: customer.name,
+          billing_month: monthName,
+          billing_year: year,
           due_date: dueDate.toISOString().split('T')[0],
           amount: monthlyFee,
           previous_debt: previousDebt,
           total_amount: totalBillAmount,
-          remaining_amount: totalBillAmount,
-          paid_amount: 0,
-          status: 'pending'
-        })
+          status: 'unpaid'
+        }
 
+        billsToCreate.push(billData)
         totalAmount += totalBillAmount
-        allExistingBills.push({ bill_number: billNumber }) // Add to list to avoid duplicates
       }
 
-      // Insert bills
-      const createdBills = jsonStorage.insert(TABLES.BILLS, billsToCreate)
+      console.log('💾 Creating', billsToCreate.length, 'bills...')
+
+      // Insert bills one by one (for better error handling)
+      const createdBills = []
+      let successCount = 0
+      let errorCount = 0
+      
+      for (let i = 0; i < billsToCreate.length; i++) {
+        const billData = billsToCreate[i]
+        console.log(`📝 Creating bill ${i+1}/${billsToCreate.length}:`, billData.bill_number, 'for', billData.customer_name)
+        
+        try {
+          const { data: createdBill, error } = await storageAdapter.createBill(billData)
+          if (error) {
+            console.error('❌ Error creating bill:', error, billData)
+            errorCount++
+          } else {
+            console.log('✅ Bill created:', createdBill?.bill_number || 'unknown')
+            createdBills.push(createdBill)
+            successCount++
+          }
+        } catch (err) {
+          console.error('❌ Exception creating bill:', err.message, billData)
+          errorCount++
+        }
+      }
+
+      console.log(`✅ Successfully created ${successCount} bills, ${errorCount} errors`)
 
       // Record billing history
-      jsonStorage.insert(TABLES.BILLING_HISTORY, {
-        billing_month: billingPeriodStart.toISOString().split('T')[0],
-        total_customers: customersToProcess.length,
-        total_bills_generated: createdBills.length,
-        total_amount: totalAmount,
-        status: 'completed'
+      await storageAdapter.createBillingHistory({
+        action: 'generate_monthly_bills',
+        description: `Generated ${createdBills.length} bills for ${monthName} ${year}. Total amount: Rp ${totalAmount.toLocaleString()}`
       })
 
       return { 
         data: { 
-          message: `Successfully generated ${createdBills.length} bills`,
+          message: `Successfully generated ${createdBills.length} bills for ${monthName} ${year}`,
           bills: createdBills,
-          totalAmount
+          totalAmount,
+          monthName,
+          year
         }, 
         error: null 
       }
@@ -262,27 +293,29 @@ export const billingService = {
   // Get billing statistics
   async getBillingStats(month = null) {
     try {
-      let bills = jsonStorage.select(TABLES.BILLS)
+      const { data: bills, error } = await storageAdapter.getBills()
+      
+      if (error) throw new Error(error)
+
+      let filteredBills = bills || []
 
       if (month) {
-        const startDate = new Date(month)
-        const endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0)
-        const startStr = startDate.toISOString().split('T')[0]
-        const endStr = endDate.toISOString().split('T')[0]
+        const monthName = new Date(month).toLocaleLaleString('id-ID', { month: 'long' })
+        const year = new Date(month).getFullYear()
         
-        bills = bills.filter(b => 
-          b.billing_period_start >= startStr && b.billing_period_end <= endStr
+        filteredBills = filteredBills.filter(b => 
+          b.billing_month === monthName && b.billing_year === year
         )
       }
 
       const stats = {
-        totalBills: bills.length,
-        pendingBills: bills.filter(b => b.status === 'pending').length,
-        paidBills: bills.filter(b => b.status === 'paid').length,
-        overdueBills: bills.filter(b => b.status === 'overdue').length,
-        totalAmount: bills.reduce((sum, b) => sum + (b.total_amount || 0), 0),
-        totalPaid: bills.reduce((sum, b) => sum + (b.paid_amount || 0), 0),
-        totalOutstanding: bills.reduce((sum, b) => sum + (b.remaining_amount || 0), 0)
+        totalBills: filteredBills.length,
+        unpaidBills: filteredBills.filter(b => b.status === 'unpaid').length,
+        paidBills: filteredBills.filter(b => b.status === 'paid').length,
+        partialBills: filteredBills.filter(b => b.status === 'partial').length,
+        totalAmount: filteredBills.reduce((sum, b) => sum + (b.total_amount || 0), 0),
+        totalPaid: filteredBills.reduce((sum, b) => sum + (b.amount - (b.previous_debt || 0)), 0),
+        totalOutstanding: filteredBills.filter(b => b.status === 'unpaid').reduce((sum, b) => sum + (b.total_amount || 0), 0)
       }
 
       return { data: stats, error: null }
