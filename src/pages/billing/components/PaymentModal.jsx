@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import Button from '../../../components/ui/Button';
 import Input from '../../../components/ui/Input';
 import Select from '../../../components/ui/Select';
-import { Checkbox } from '../../../components/ui/Checkbox';
 import { billingService } from '../../../services/billingService';
 
 const PaymentModal = ({ bill, onClose, onPaymentRecorded }) => {
@@ -265,13 +264,15 @@ const PaymentModal = ({ bill, onClose, onPaymentRecorded }) => {
             {bill.customers?.phone && (
               <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                 <div className="flex items-start space-x-3">
-                  <Checkbox
+                  <input
+                    type="checkbox"
+                    id="send_whatsapp"
                     checked={formData.send_whatsapp_notification}
-                    onChange={(checked) => setFormData(prev => ({ ...prev, send_whatsapp_notification: checked }))}
-                    className="mt-1"
+                    onChange={(e) => setFormData(prev => ({ ...prev, send_whatsapp_notification: e.target.checked }))}
+                    className="mt-1 h-4 w-4 text-green-600 border-green-300 rounded focus:ring-green-500 cursor-pointer"
                   />
                   <div className="flex-1">
-                    <label className="text-sm font-medium text-green-800 cursor-pointer">
+                    <label htmlFor="send_whatsapp" className="text-sm font-medium text-green-800 cursor-pointer">
                       Kirim konfirmasi pembayaran via WhatsApp
                     </label>
                     <p className="text-xs text-green-700 mt-1">
