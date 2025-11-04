@@ -1,11 +1,11 @@
-import neonStorage from '../lib/neonStorage'
+import storageAdapter from '../lib/storageAdapter'
 
 // Customer service functions
 export const customerService = {
   // Get all customers with optional filtering
   async getCustomers(filters = {}) {
     try {
-      return await neonStorage.getCustomers()
+      return await storageAdapter.getCustomers(filters)
     } catch (error) {
       console.error('Error fetching customers:', error)
       return { data: null, error: error.message }
@@ -15,7 +15,7 @@ export const customerService = {
   // Get single customer by ID
   async getCustomerById(id) {
     try {
-      return await neonStorage.getCustomerById(id)
+      return await storageAdapter.getCustomerById(id)
     } catch (error) {
       console.error('Error fetching customer:', error)
       return { data: null, error: error.message }
@@ -25,7 +25,7 @@ export const customerService = {
   // Create new customer
   async createCustomer(customerData) {
     try {
-      return await neonStorage.createCustomer(customerData)
+      return await storageAdapter.createCustomer(customerData)
     } catch (error) {
       console.error('Error creating customer:', error)
       return { data: null, error: error.message }
@@ -35,7 +35,7 @@ export const customerService = {
   // Update customer
   async updateCustomer(id, customerData) {
     try {
-      return await neonStorage.updateCustomer(id, customerData)
+      return await storageAdapter.updateCustomer(id, customerData)
     } catch (error) {
       console.error('Error updating customer:', error)
       return { data: null, error: error.message }
@@ -45,7 +45,7 @@ export const customerService = {
   // Delete customer
   async deleteCustomer(id) {
     try {
-      return await neonStorage.deleteCustomer(id)
+      return await storageAdapter.deleteCustomer(id)
     } catch (error) {
       console.error('Error deleting customer:', error)
       return { error: error.message }
@@ -55,9 +55,9 @@ export const customerService = {
   // Update customer status
   async updateCustomerStatus(id, status) {
     try {
-      const customer = await neonStorage.getCustomerById(id)
+      const customer = await storageAdapter.getCustomerById(id)
       if (!customer.data) throw new Error('Customer not found')
-      return await neonStorage.updateCustomer(id, { ...customer.data, status })
+      return await storageAdapter.updateCustomer(id, { ...customer.data, status })
     } catch (error) {
       console.error('Error updating customer status:', error)
       return { data: null, error: error.message }
@@ -67,9 +67,9 @@ export const customerService = {
   // Update customer hutang/debt
   async updateCustomerHutang(id, hutang) {
     try {
-      const customer = await neonStorage.getCustomerById(id)
+      const customer = await storageAdapter.getCustomerById(id)
       if (!customer.data) throw new Error('Customer not found')
-      return await neonStorage.updateCustomer(id, { ...customer.data, hutang })
+      return await storageAdapter.updateCustomer(id, { ...customer.data, hutang })
     } catch (error) {
       console.error('Error updating customer hutang:', error)
       return { data: null, error: error.message }
@@ -79,7 +79,7 @@ export const customerService = {
   // Get customer statistics
   async getCustomerStats() {
     try {
-      const result = await neonStorage.getCustomers()
+      const result = await storageAdapter.getCustomers()
       if (result.error) throw new Error(result.error)
       
       const data = result.data || []
@@ -104,7 +104,7 @@ export const packageService = {
   // Get all packages
   async getPackages() {
     try {
-      return await neonStorage.getPackages()
+      return await storageAdapter.getPackages()
     } catch (error) {
       console.error('Error fetching packages:', error)
       return { data: null, error: error.message }

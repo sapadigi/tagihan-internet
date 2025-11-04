@@ -1,7 +1,14 @@
-import sql from './db.js';
+import { neon } from '@neondatabase/serverless';
 
 export async function initializeDatabase() {
   try {
+    // Get database URL from environment
+    const dbUrl = import.meta.env.VITE_DATABASE_URL;
+    if (!dbUrl) {
+      throw new Error('VITE_DATABASE_URL tidak ditemukan di environment variables');
+    }
+    
+    const sql = neon(dbUrl);
     console.log('Creating database tables...');
 
     // Create packages table

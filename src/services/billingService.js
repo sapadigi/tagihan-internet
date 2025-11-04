@@ -1,4 +1,4 @@
-import jsonStorage, { TABLES } from '../lib/jsonStorage'
+import storageAdapter from '../lib/storageAdapter'
 import { wahaService } from './wahaService'
 
 // Billing service functions
@@ -41,63 +41,7 @@ export const billingService = {
   // Get all bills with optional filtering
   async getBills(filters = {}) {
     try {
-      // Get bills
-      let bills = jsonStorage.select(TABLES.BILLS)
-      
-      // Join with customers
-      const customers = jsonStorage.select(TABLES.CUSTOMERS)
-      bills = bills.map(bill => ({
-        ...bill,
-        customers: customers.find(c => c.id === bill.customer_id) || null
-      }))
-
-      // Apply status filter
-      if (filters.status && filters.status !== 'all') {
-        bills = bills.filter(b => b.status === filters.status)
-      }
-
-      // Apply customer filter
-      if (filters.customer_id) {
-        bills = bills.filter(b => b.customer_id === filters.customer_id)
-      }
-
-      // Apply billing month filter
-      if (filters.billing_month) {
-        const startDate = new Date(filters.billing_month)
-        const endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0)
-        const startStr = startDate.toISOString().split('T')[0]
-        const endStr = endDate.toISOString().split('T')[0]
-        
-        bills = bills.filter(b => 
-          b.billing_period_start >= startStr && b.billing_period_end <= endStr
-        )
-      }
-
-      // Apply search filter
-      if (filters.search) {
-        const searchLower = filters.search.toLowerCase()
-        bills = bills.filter(b => 
-          b.bill_number && b.bill_number.toLowerCase().includes(searchLower)
-        )
-      }
-
-      // Apply customer debt filter
-      if (filters.customer_debt && filters.customer_debt !== 'all') {
-        if (filters.customer_debt === 'with_debt') {
-          bills = bills.filter(bill => bill.customers?.hutang && bill.customers.hutang > 0)
-        } else if (filters.customer_debt === 'no_debt') {
-          bills = bills.filter(bill => !bill.customers?.hutang || bill.customers.hutang === 0)
-        }
-      }
-
-      // Sort by created_at descending
-      bills.sort((a, b) => {
-        const dateA = new Date(a.created_at)
-        const dateB = new Date(b.created_at)
-        return dateB - dateA
-      })
-
-      return { data: bills, error: null }
+      return await storageAdapter.getBills(filters)
     } catch (error) {
       console.error('Error fetching bills:', error)
       return { data: null, error: error.message }
