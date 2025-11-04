@@ -95,45 +95,36 @@ CREATE INDEX idx_payments_customer ON payments(customer_id);
 -- ================================================
 
 INSERT INTO packages (name, speed, price, description, is_active) VALUES
-('Basic', '10 Mbps', 100000, 'Paket internet dasar untuk kebutuhan browsing', true),
-('Standard', '20 Mbps', 150000, 'Paket internet standar untuk streaming dan gaming', true),
-('Premium', '50 Mbps', 200000, 'Paket internet premium untuk kebutuhan bisnis', true),
+('Paket Voucher', '10 Mbps', 100000, 'Paket voucher internet untuk kebutuhan browsing', true),
+('Paket Anak', '10 Mbps', 150000, 'Paket internet untuk anak-anak dan kebutuhan keluarga', true),
+('Paket Keluarga', '10 Mbps', 200000, 'Paket internet keluarga untuk kebutuhan maksimal', true),
 ('Putus', '0 Mbps', 0, 'Paket untuk pelanggan yang putus layanan, hanya menagih hutang tanpa biaya bulanan', true);
 
 -- ================================================
--- INSERT SAMPLE CUSTOMERS
+-- INSERT SAMPLE CUSTOMERS (20 customers from JSON storage)
 -- ================================================
 
 INSERT INTO customers (name, email, phone, address, package_name, package_speed, monthly_fee, status) VALUES
--- Active customers
-('Budi Santoso', 'budi.santoso@email.com', '081234567890', 'Jl. Merdeka No. 123, Jakarta Pusat', 'Standard', '20 Mbps', 150000, 'active'),
-('Siti Nurhaliza', 'siti.nurhaliza@email.com', '081234567891', 'Jl. Sudirman No. 456, Bandung', 'Premium', '50 Mbps', 200000, 'active'),
-('Ahmad Rahman', 'ahmad.rahman@email.com', '081234567892', 'Jl. Gatot Subroto No. 789, Surabaya', 'Basic', '10 Mbps', 100000, 'active'),
-('Dewi Lestari', 'dewi.lestari@email.com', '081234567893', 'Jl. Diponegoro No. 321, Yogyakarta', 'Standard', '20 Mbps', 150000, 'active'),
-('Eko Prasetyo', 'eko.prasetyo@email.com', '081234567894', 'Jl. Ahmad Yani No. 654, Semarang', 'Premium', '50 Mbps', 200000, 'active'),
-('Fitri Handayani', 'fitri.handayani@email.com', '081234567895', 'Jl. Imam Bonjol No. 987, Medan', 'Basic', '10 Mbps', 100000, 'active'),
-('Gunawan Wijaya', 'gunawan.wijaya@email.com', '081234567896', 'Jl. Hayam Wuruk No. 147, Makassar', 'Standard', '20 Mbps', 150000, 'active'),
-('Hendra Kusuma', 'hendra.kusuma@email.com', '081234567897', 'Jl. Thamrin No. 258, Palembang', 'Premium', '50 Mbps', 200000, 'active'),
-('Indah Permata', 'indah.permata@email.com', '081234567898', 'Jl. Asia Afrika No. 369, Malang', 'Basic', '10 Mbps', 100000, 'active'),
-('Joko Widodo', 'joko.widodo@email.com', '081234567899', 'Jl. Proklamasi No. 741, Solo', 'Standard', '20 Mbps', 150000, 'active'),
-
--- More customers
-('Kartika Sari', 'kartika.sari@email.com', '081234567800', 'Jl. Pemuda No. 852, Bali', 'Premium', '50 Mbps', 200000, 'active'),
-('Lukman Hakim', 'lukman.hakim@email.com', '081234567801', 'Jl. Pahlawan No. 963, Pontianak', 'Basic', '10 Mbps', 100000, 'active'),
-('Maya Anggraini', 'maya.anggraini@email.com', '081234567802', 'Jl. Veteran No. 159, Banjarmasin', 'Standard', '20 Mbps', 150000, 'active'),
-('Nugroho Santoso', 'nugroho.santoso@email.com', '081234567803', 'Jl. Gajah Mada No. 357, Balikpapan', 'Premium', '50 Mbps', 200000, 'active'),
-('Olivia Tan', 'olivia.tan@email.com', '081234567804', 'Jl. Pangeran Antasari No. 486, Manado', 'Basic', '10 Mbps', 100000, 'active'),
-
--- Suspended customers
-('Putri Maharani', 'putri.maharani@email.com', '081234567805', 'Jl. Cendrawasih No. 753, Pekanbaru', 'Standard', '20 Mbps', 150000, 'suspended'),
-('Rudi Hartono', 'rudi.hartono@email.com', '081234567806', 'Jl. Garuda No. 864, Jambi', 'Basic', '10 Mbps', 100000, 'suspended'),
-
--- Terminated customer
-('Sari Dewi', 'sari.dewi@email.com', '081234567807', 'Jl. Mawar No. 975, Padang', 'Putus', '0 Mbps', 0, 'terminated'),
-
--- More active customers
-('Taufik Hidayat', 'taufik.hidayat@email.com', '081234567808', 'Jl. Melati No. 159, Lampung', 'Standard', '20 Mbps', 150000, 'active'),
-('Usman Ali', 'usman.ali@email.com', '081234567809', 'Jl. Anggrek No. 357, Bengkulu', 'Premium', '50 Mbps', 200000, 'active');
+('Pa Bayu', 'pa.bayu@tbw.net', '08129695655', '', 'Paket Voucher', '10 Mbps', 100000, 'active'),
+('Pa Ipan', 'pa.ipan@tbw.net', '081313071917', '', 'Paket Anak', '10 Mbps', 150000, 'active'),
+('Bu Siti', 'bu.siti@tbw.net', '088220787016', '', 'Paket Anak', '10 Mbps', 150000, 'active'),
+('Pa Rizky', 'pa.rizky@tbw.net', '081296562013', '', 'Paket Anak', '10 Mbps', 150000, 'active'),
+('Pa Faisal', 'pa.faisal@tbw.net', '085770222733', '', 'Paket Anak', '10 Mbps', 150000, 'active'),
+('Pa Asep', 'pa.asep@tbw.net', '085920032227', '', 'Paket Anak', '10 Mbps', 150000, 'active'),
+('Anggia TB', 'anggia.tb@tbw.net', '085223125780', '', 'Paket Voucher', '10 Mbps', 100000, 'active'),
+('Ramdani', 'ramdani@tbw.net', '087712380873', '', 'Paket Anak', '10 Mbps', 150000, 'active'),
+('Bu Rosmawati', 'bu.rosmawati@tbw.net', '087850747660', '', 'Paket Anak', '10 Mbps', 150000, 'active'),
+('Pa Ahmad', 'pa.ahmad@tbw.net', '081323658985', '', 'Paket Anak', '10 Mbps', 150000, 'active'),
+('Yeti', 'yeti@tbw.net', '085951556195', '', 'Paket Keluarga', '10 Mbps', 200000, 'active'),
+('Susi', 'susi@tbw.net', '08773664147', '', 'Paket Anak', '10 Mbps', 150000, 'active'),
+('Endang', 'endang@tbw.net', '087844720321', '', 'Paket Anak', '10 Mbps', 150000, 'active'),
+('Lilip', 'lilip@tbw.net', '083120238470', '', 'Paket Anak', '10 Mbps', 150000, 'active'),
+('Bu Yoyoh', 'bu.yoyoh@tbw.net', '089651543687', '', 'Paket Anak', '10 Mbps', 150000, 'active'),
+('Bu Enur', 'bu.enur@tbw.net', '081248182113', '', 'Paket Anak', '10 Mbps', 150000, 'active'),
+('Patonah', 'patonah@tbw.net', '081997830939', '', 'Paket Anak', '10 Mbps', 150000, 'active'),
+('Iah Siti Solihah', 'iah.siti.solihah@tbw.net', '08996982447', '', 'Paket Anak', '10 Mbps', 150000, 'active'),
+('Risa Rismawati', 'risa.rismawati@tbw.net', '08987782521', '', 'Paket Anak', '10 Mbps', 150000, 'active'),
+('Pa Candra', 'pa.candra@tbw.net', '6281394569287', '', 'Paket Anak', '10 Mbps', 150000, 'active');
 
 -- ================================================
 -- VERIFICATION QUERIES
@@ -167,5 +158,5 @@ SELECT id, name, phone, package_name, monthly_fee, status FROM customers LIMIT 1
 -- ================================================
 
 SELECT '✅ Database setup completed successfully!' as message;
-SELECT '📦 Total Packages: 4' as summary;
-SELECT '👥 Total Customers: 20' as summary;
+SELECT '📦 Total Packages: 4 (Paket Voucher, Paket Anak, Paket Keluarga, Putus)' as summary;
+SELECT '👥 Total Customers: 20 (sesuai data JSON storage)' as summary;
