@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup Neon Database</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .status {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .status.info {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .status.success {
+            background: #e8f5e9;
+            color: #388e3c;
+        }
+
+        .status.error {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .status.warning {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 10px 5px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .log {
+            background: #f5f5f5;
+            border-radius: 10px;
+            padding: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+
+        .log-entry {
+            padding: 5px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Setup Neon Database</h1>
+        <p class="subtitle">Inisialisasi database PostgreSQL di Neon</p>
+
+        <div id="status" class="status info">
+            <strong>Status:</strong> Siap untuk setup database
+        </div>
+
+        <div>
+            <button id="setupBtn" onclick="setupDatabase()">
+                Setup Database
+            </button>
+            <button id="testBtn" onclick="testConnection()" disabled>
+                Test Koneksi
+            </button>
+        </div>
+
+        <div id="log" class="log" style="display: none;"></div>
+    </div>
+
+    <script type="module">
+        import { initializeDatabase } from './api/init-db.js';
+
+        let logElement;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            logElement = document.getElementById('log');
+        });
+
+        function addLog(message, type = 'info') {
+            if (!logElement) return;
+            
+            logElement.style.display = 'block';
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.style.color = type === 'error' ? '#c62828' : type === 'success' ? '#388e3c' : '#333';
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logElement.appendChild(entry);
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        function setStatus(message, type = 'info') {
+            const status = document.getElementById('status');
+            status.className = `status ${type}`;
+            status.innerHTML = `<strong>Status:</strong> ${message}`;
+        }
+
+        window.setupDatabase = async function() {
+            const setupBtn = document.getElementById('setupBtn');
+            const testBtn = document.getElementById('testBtn');
+            
+            setupBtn.disabled = true;
+            setupBtn.innerHTML = '<span class="loading"></span> Sedang setup...';
+            
+            setStatus('Menginisialisasi database...', 'info');
+            addLog('Memulai setup database...', 'info');
+
+            try {
+                addLog('Membuat tabel-tabel database...', 'info');
+                const result = await initializeDatabase();
+
+                if (result.success) {
+                    addLog('✓ Tabel berhasil dibuat', 'success');
+                    addLog('✓ Package default berhasil ditambahkan', 'success');
+                    addLog('✓ Sample customers berhasil ditambahkan', 'success');
+                    setStatus('Database berhasil disetup! ✓', 'success');
+                    testBtn.disabled = false;
+                } else {
+                    throw new Error(result.error);
+                }
+            } catch (error) {
+                console.error('Setup error:', error);
+                addLog(`✗ Error: ${error.message}`, 'error');
+                setStatus(`Setup gagal: ${error.message}`, 'error');
+            } finally {
+                setupBtn.disabled = false;
+                setupBtn.textContent = 'Setup Database';
+            }
+        };
+
+        window.testConnection = async function() {
+            const testBtn = document.getElementById('testBtn');
+            testBtn.disabled = true;
+            testBtn.innerHTML = '<span class="loading"></span> Testing...';
+            
+            setStatus('Menguji koneksi database...', 'info');
+            addLog('Menguji koneksi ke Neon...', 'info');
+
+            try {
+                const { default: neonStorage } = await import('./src/lib/neonStorage.js');
+                
+                addLog('Testing getPackages()...', 'info');
+                const packagesResult = await neonStorage.getPackages();
+                
+                if (packagesResult.error) {
+                    throw new Error(packagesResult.error);
+                }
+                
+                addLog(`✓ Found ${packagesResult.data.length} packages`, 'success');
+                
+                addLog('Testing getCustomers()...', 'info');
+                const customersResult = await neonStorage.getCustomers();
+                
+                if (customersResult.error) {
+                    throw new Error(customersResult.error);
+                }
+                
+                addLog(`✓ Found ${customersResult.data.length} customers`, 'success');
+                setStatus('Koneksi database berhasil! ✓', 'success');
+            } catch (error) {
+                console.error('Test error:', error);
+                addLog(`✗ Error: ${error.message}`, 'error');
+                setStatus(`Test gagal: ${error.message}`, 'error');
+            } finally {
+                testBtn.disabled = false;
+                testBtn.textContent = 'Test Koneksi';
+            }
+        };
+    </script>
+</body>
+</html>
