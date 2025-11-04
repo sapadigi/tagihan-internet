@@ -1,41 +1,18 @@
-import { supabase, TABLES } from '../lib/supabase'
+import jsonStorage, { TABLES } from '../lib/jsonStorage'
 
 // Customer service functions
 export const customerService = {
   // Get all customers with optional filtering
   async getCustomers(filters = {}) {
     try {
-      let query = supabase
-        .from(TABLES.CUSTOMERS)
-        .select('*')
-
-      // Apply sorting
-      const sortField = filters.sortBy || 'created_at';
-      const sortDirection = filters.sortOrder === 'asc' ? true : false;
-      query = query.order(sortField, { ascending: sortDirection });
-
-      // Apply filters
-      if (filters.status && filters.status !== 'all') {
-        query = query.eq('status', filters.status)
+      // Set default sorting
+      const queryFilters = {
+        ...filters,
+        sortBy: filters.sortBy || 'created_at',
+        sortOrder: filters.sortOrder || 'desc'
       }
 
-      if (filters.search) {
-        query = query.or(`name.ilike.%${filters.search}%,email.ilike.%${filters.search}%,customer_id.ilike.%${filters.search}%`)
-      }
-
-      if (filters.hutang && filters.hutang !== 'all') {
-        if (filters.hutang === 'berhutang') {
-          query = query.gt('hutang', 0)
-        } else if (filters.hutang === 'lunas') {
-          query = query.or('hutang.is.null,hutang.eq.0')
-        }
-      }
-
-      const { data, error } = await query
-
-      if (error) {
-        throw error
-      }
+      const data = jsonStorage.select(TABLES.CUSTOMERS, { filters: queryFilters })
 
       return { data, error: null }
     } catch (error) {
@@ -47,14 +24,13 @@ export const customerService = {
   // Get single customer by ID
   async getCustomerById(id) {
     try {
-      const { data, error } = await supabase
-        .from(TABLES.CUSTOMERS)
-        .select('*')
-        .eq('id', id)
-        .single()
+      const data = jsonStorage.select(TABLES.CUSTOMERS, { 
+        filters: { id },
+        single: true 
+      })
 
-      if (error) {
-        throw error
+      if (!data) {
+        throw new Error('Customer not found')
       }
 
       return { data, error: null }
@@ -67,25 +43,25 @@ export const customerService = {
   // Create new customer
   async createCustomer(customerData) {
     try {
-      const { data, error } = await supabase
-        .from(TABLES.CUSTOMERS)
-        .insert([{
-          name: customerData.name,
-          email: customerData.email,
-          phone: customerData.phone,
-          address: customerData.address,
-          package_name: customerData.package_name,
-          package_speed: customerData.package_speed,
-          monthly_fee: customerData.monthly_fee,
-          status: customerData.status || 'active',
-          join_date: customerData.join_date || new Date().toISOString().split('T')[0]
-        }])
-        .select()
-        .single()
+      // Get all customers to generate customer_id
+      const allCustomers = jsonStorage.select(TABLES.CUSTOMERS)
+      const customerId = jsonStorage.generateCustomerId(allCustomers)
 
-      if (error) {
-        throw error
+      const newCustomer = {
+        customer_id: customerId,
+        name: customerData.name,
+        email: customerData.email,
+        phone: customerData.phone,
+        address: customerData.address,
+        package_name: customerData.package_name,
+        package_speed: customerData.package_speed,
+        monthly_fee: customerData.monthly_fee,
+        status: customerData.status || 'active',
+        join_date: customerData.join_date || new Date().toISOString().split('T')[0],
+        hutang: 0
       }
+
+      const [data] = jsonStorage.insert(TABLES.CUSTOMERS, newCustomer)
 
       return { data, error: null }
     } catch (error) {
@@ -97,25 +73,20 @@ export const customerService = {
   // Update customer
   async updateCustomer(id, customerData) {
     try {
-      const { data, error } = await supabase
-        .from(TABLES.CUSTOMERS)
-        .update({
-          name: customerData.name,
-          email: customerData.email,
-          phone: customerData.phone,
-          address: customerData.address,
-          package_name: customerData.package_name,
-          package_speed: customerData.package_speed,
-          monthly_fee: customerData.monthly_fee,
-          hutang: customerData.hutang,
-          status: customerData.status
-        })
-        .eq('id', id)
-        .select()
-        .single()
+      const data = jsonStorage.update(TABLES.CUSTOMERS, id, {
+        name: customerData.name,
+        email: customerData.email,
+        phone: customerData.phone,
+        address: customerData.address,
+        package_name: customerData.package_name,
+        package_speed: customerData.package_speed,
+        monthly_fee: customerData.monthly_fee,
+        hutang: customerData.hutang,
+        status: customerData.status
+      })
 
-      if (error) {
-        throw error
+      if (!data) {
+        throw new Error('Customer not found')
       }
 
       return { data, error: null }
@@ -128,13 +99,10 @@ export const customerService = {
   // Delete customer
   async deleteCustomer(id) {
     try {
-      const { error } = await supabase
-        .from(TABLES.CUSTOMERS)
-        .delete()
-        .eq('id', id)
+      const success = jsonStorage.delete(TABLES.CUSTOMERS, id)
 
-      if (error) {
-        throw error
+      if (!success) {
+        throw new Error('Customer not found')
       }
 
       return { error: null }
@@ -147,15 +115,10 @@ export const customerService = {
   // Update customer status
   async updateCustomerStatus(id, status) {
     try {
-      const { data, error } = await supabase
-        .from(TABLES.CUSTOMERS)
-        .update({ status })
-        .eq('id', id)
-        .select()
-        .single()
+      const data = jsonStorage.update(TABLES.CUSTOMERS, id, { status })
 
-      if (error) {
-        throw error
+      if (!data) {
+        throw new Error('Customer not found')
       }
 
       return { data, error: null }
@@ -168,15 +131,10 @@ export const customerService = {
   // Update customer hutang/debt
   async updateCustomerHutang(id, hutang) {
     try {
-      const { data, error } = await supabase
-        .from(TABLES.CUSTOMERS)
-        .update({ hutang })
-        .eq('id', id)
-        .select()
-        .single()
+      const data = jsonStorage.update(TABLES.CUSTOMERS, id, { hutang })
 
-      if (error) {
-        throw error
+      if (!data) {
+        throw new Error('Customer not found')
       }
 
       return { data, error: null }
@@ -189,13 +147,7 @@ export const customerService = {
   // Get customer statistics
   async getCustomerStats() {
     try {
-      const { data, error } = await supabase
-        .from(TABLES.CUSTOMERS)
-        .select('status, monthly_fee')
-
-      if (error) {
-        throw error
-      }
+      const data = jsonStorage.select(TABLES.CUSTOMERS)
 
       const stats = {
         total: data.length,
@@ -218,15 +170,9 @@ export const packageService = {
   // Get all packages
   async getPackages() {
     try {
-      const { data, error } = await supabase
-        .from(TABLES.PACKAGES)
-        .select('*')
-        .eq('is_active', true)
-        .order('price', { ascending: true })
-
-      if (error) {
-        throw error
-      }
+      const data = jsonStorage.select(TABLES.PACKAGES, {
+        filters: { is_active: true, sortBy: 'price', sortOrder: 'asc' }
+      })
 
       return { data, error: null }
     } catch (error) {

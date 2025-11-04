@@ -1,0 +1,233 @@
+{
+  "customers": [
+    {
+      "id": 1,
+      "customer_id": "CUST-2025-0001",
+      "name": "Budi Santoso",
+      "email": "budi.santoso@email.com",
+      "phone": "081234567890",
+      "address": "Jl. Merdeka No. 123, Jakarta",
+      "package_name": "Standard",
+      "package_speed": "20 Mbps",
+      "monthly_fee": 300000,
+      "status": "active",
+      "join_date": "2025-01-15",
+      "hutang": 0,
+      "created_at": "2025-01-15T10:00:00.000Z"
+    },
+    {
+      "id": 2,
+      "customer_id": "CUST-2025-0002",
+      "name": "Siti Aminah",
+      "email": "siti.aminah@email.com",
+      "phone": "082345678901",
+      "address": "Jl. Sudirman No. 45, Jakarta",
+      "package_name": "Premium",
+      "package_speed": "50 Mbps",
+      "monthly_fee": 500000,
+      "status": "active",
+      "join_date": "2025-01-20",
+      "hutang": 0,
+      "created_at": "2025-01-20T11:30:00.000Z"
+    },
+    {
+      "id": 3,
+      "customer_id": "CUST-2025-0003",
+      "name": "Ahmad Wijaya",
+      "email": "ahmad.wijaya@email.com",
+      "phone": "083456789012",
+      "address": "Jl. Thamrin No. 78, Jakarta",
+      "package_name": "Basic",
+      "package_speed": "10 Mbps",
+      "monthly_fee": 200000,
+      "status": "active",
+      "join_date": "2025-02-01",
+      "hutang": 0,
+      "created_at": "2025-02-01T09:00:00.000Z"
+    },
+    {
+      "id": 4,
+      "customer_id": "CUST-2025-0004",
+      "name": "Dewi Lestari",
+      "email": "dewi.lestari@email.com",
+      "phone": "084567890123",
+      "address": "Jl. Gatot Subroto No. 90, Jakarta",
+      "package_name": "Ultimate",
+      "package_speed": "100 Mbps",
+      "monthly_fee": 800000,
+      "status": "active",
+      "join_date": "2025-02-10",
+      "hutang": 0,
+      "created_at": "2025-02-10T14:00:00.000Z"
+    },
+    {
+      "id": 5,
+      "customer_id": "CUST-2025-0005",
+      "name": "Rudi Hartono",
+      "email": "rudi.hartono@email.com",
+      "phone": "085678901234",
+      "address": "Jl. Kebon Jeruk No. 12, Jakarta",
+      "package_name": "Standard",
+      "package_speed": "20 Mbps",
+      "monthly_fee": 300000,
+      "status": "suspended",
+      "join_date": "2025-01-05",
+      "hutang": 300000,
+      "created_at": "2025-01-05T08:00:00.000Z"
+    }
+  ],
+  "packages": [
+    {
+      "id": 1,
+      "name": "Basic",
+      "speed": "10 Mbps",
+      "price": 200000,
+      "description": "Paket internet dasar untuk kebutuhan browsing",
+      "is_active": true,
+      "created_at": "2025-01-01T00:00:00.000Z"
+    },
+    {
+      "id": 2,
+      "name": "Standard",
+      "speed": "20 Mbps",
+      "price": 300000,
+      "description": "Paket internet standar untuk streaming dan gaming",
+      "is_active": true,
+      "created_at": "2025-01-01T00:00:00.000Z"
+    },
+    {
+      "id": 3,
+      "name": "Premium",
+      "speed": "50 Mbps",
+      "price": 500000,
+      "description": "Paket internet premium untuk kebutuhan bisnis",
+      "is_active": true,
+      "created_at": "2025-01-01T00:00:00.000Z"
+    },
+    {
+      "id": 4,
+      "name": "Ultimate",
+      "speed": "100 Mbps",
+      "price": 800000,
+      "description": "Paket internet tercepat untuk kebutuhan enterprise",
+      "is_active": true,
+      "created_at": "2025-01-01T00:00:00.000Z"
+    }
+  ],
+  "bills": [
+    {
+      "id": 1,
+      "bill_number": "BILL-2025-11-0001",
+      "customer_id": 1,
+      "billing_period_start": "2025-11-01",
+      "billing_period_end": "2025-11-30",
+      "due_date": "2025-11-30",
+      "amount": 300000,
+      "previous_debt": 0,
+      "total_amount": 300000,
+      "remaining_amount": 0,
+      "paid_amount": 300000,
+      "status": "paid",
+      "payment_date": "2025-11-05T10:30:00.000Z",
+      "created_at": "2025-11-01T00:00:00.000Z"
+    },
+    {
+      "id": 2,
+      "bill_number": "BILL-2025-11-0002",
+      "customer_id": 2,
+      "billing_period_start": "2025-11-01",
+      "billing_period_end": "2025-11-30",
+      "due_date": "2025-11-30",
+      "amount": 500000,
+      "previous_debt": 0,
+      "total_amount": 500000,
+      "remaining_amount": 250000,
+      "paid_amount": 250000,
+      "status": "partial",
+      "created_at": "2025-11-01T00:00:00.000Z"
+    },
+    {
+      "id": 3,
+      "bill_number": "BILL-2025-11-0003",
+      "customer_id": 3,
+      "billing_period_start": "2025-11-01",
+      "billing_period_end": "2025-11-30",
+      "due_date": "2025-11-30",
+      "amount": 200000,
+      "previous_debt": 0,
+      "total_amount": 200000,
+      "remaining_amount": 200000,
+      "paid_amount": 0,
+      "status": "pending",
+      "created_at": "2025-11-01T00:00:00.000Z"
+    },
+    {
+      "id": 4,
+      "bill_number": "BILL-2025-11-0004",
+      "customer_id": 4,
+      "billing_period_start": "2025-11-01",
+      "billing_period_end": "2025-11-30",
+      "due_date": "2025-11-30",
+      "amount": 800000,
+      "previous_debt": 0,
+      "total_amount": 800000,
+      "remaining_amount": 0,
+      "paid_amount": 800000,
+      "status": "paid",
+      "payment_date": "2025-11-03T15:00:00.000Z",
+      "created_at": "2025-11-01T00:00:00.000Z"
+    }
+  ],
+  "payments": [
+    {
+      "id": 1,
+      "payment_number": "PAY-20251105-103000-1730795400000-0001",
+      "bill_id": 1,
+      "customer_id": 1,
+      "amount": 300000,
+      "payment_method": "transfer",
+      "payment_date": "2025-11-05T10:30:00.000Z",
+      "reference_number": "TRF123456789",
+      "notes": "Transfer via BCA",
+      "created_by": "admin",
+      "created_at": "2025-11-05T10:30:00.000Z"
+    },
+    {
+      "id": 2,
+      "payment_number": "PAY-20251103-150000-1730635200000-0002",
+      "bill_id": 4,
+      "customer_id": 4,
+      "amount": 800000,
+      "payment_method": "cash",
+      "payment_date": "2025-11-03T15:00:00.000Z",
+      "reference_number": "",
+      "notes": "Pembayaran tunai",
+      "created_by": "admin",
+      "created_at": "2025-11-03T15:00:00.000Z"
+    },
+    {
+      "id": 3,
+      "payment_number": "PAY-20251107-092000-1730965200000-0003",
+      "bill_id": 2,
+      "customer_id": 2,
+      "amount": 250000,
+      "payment_method": "ewallet",
+      "payment_date": "2025-11-07T09:20:00.000Z",
+      "reference_number": "GOPAY987654321",
+      "notes": "Pembayaran via GoPay",
+      "created_by": "admin",
+      "created_at": "2025-11-07T09:20:00.000Z"
+    }
+  ],
+  "billing_history": [
+    {
+      "id": 1,
+      "billing_month": "2025-11-01",
+      "total_customers": 4,
+      "total_bills_generated": 4,
+      "total_amount": 1800000,
+      "status": "completed",
+      "created_at": "2025-11-01T00:00:00.000Z"
+    }
+  ]
+}

@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Import Sample Data - Tagihan Internet</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px 5px;
+            transition: background 0.2s;
+        }
+        .btn:hover {
+            background: #2563eb;
+        }
+        .btn-danger {
+            background: #ef4444;
+        }
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+        .btn-success {
+            background: #10b981;
+        }
+        .btn-success:hover {
+            background: #059669;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            display: none;
+        }
+        .status.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+        .status.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #ef4444;
+        }
+        .status.info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #3b82f6;
+        }
+        .info-box {
+            background: #f0f9ff;
+            border-left: 4px solid #3b82f6;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        code {
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        .data-preview {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Import Data Sample</h1>
+        <p class="subtitle">Tool untuk import data contoh ke aplikasi tagihan internet</p>
+        
+        <div class="info-box">
+            <strong>ℹ️ Informasi:</strong><br>
+            Tool ini akan mengimport data sample ke localStorage browser Anda.<br>
+            Data meliputi: 5 pelanggan, 4 paket internet, beberapa tagihan dan pembayaran.
+        </div>
+
+        <div>
+            <button class="btn btn-success" onclick="importSampleData()">
+                📥 Import Data Sample
+            </button>
+            <button class="btn" onclick="viewCurrentData()">
+                👁️ Lihat Data Saat Ini
+            </button>
+            <button class="btn btn-danger" onclick="clearAllData()">
+                🗑️ Hapus Semua Data
+            </button>
+            <button class="btn" onclick="exportCurrentData()">
+                💾 Export Data
+            </button>
+        </div>
+
+        <div id="status" class="status"></div>
+        
+        <div id="dataPreview"></div>
+
+        <div class="info-box" style="margin-top: 30px;">
+            <strong>📋 Setelah Import:</strong><br>
+            1. Refresh halaman aplikasi utama<br>
+            2. Data sample akan muncul di dashboard<br>
+            3. Anda bisa mulai explore fitur-fitur aplikasi
+        </div>
+    </div>
+
+    <script>
+        const sampleData = {
+            "customers": [
+                {
+                    "id": 1,
+                    "customer_id": "CUST-002",
+                    "name": "Pa Bayu",
+                    "email": "pa.bayu@tbw.net",
+                    "phone": "08129695655",
+                    "address": "",
+                    "package_name": "Paket Voucher",
+                    "package_speed": "10 Mbps",
+                    "monthly_fee": 100000,
+                    "status": "active",
+                    "join_date": "2025-09-02",
+                    "hutang": 0,
+                    "created_at": "2025-09-02T16:30:28.905Z"
+                },
+                {
+                    "id": 2,
+                    "customer_id": "CUST-003",
+                    "name": "Pa Ipan",
+                    "email": "pa.ipan@tbw.net",
+                    "phone": "081313071917",
+                    "address": "",
+                    "package_name": "Paket Anak",
+                    "package_speed": "10 Mbps",
+                    "monthly_fee": 150000,
+                    "status": "active",
+                    "join_date": "2025-09-02",
+                    "hutang": 150000,
+                    "created_at": "2025-09-02T16:30:28.905Z"
+                },
+                {
+                    "id": 3,
+                    "customer_id": "CUST-004",
+                    "name": "Bu Siti",
+                    "email": "bu.siti@tbw.net",
+                    "phone": "088220787016",
+                    "address": "",
+                    "package_name": "Paket Anak",
+                    "package_speed": "10 Mbps",
+                    "monthly_fee": 150000,
+                    "status": "active",
+                    "join_date": "2025-09-02",
+                    "hutang": 0,
+                    "created_at": "2025-09-02T16:30:28.905Z"
+                },
+                {
+                    "id": 4,
+                    "customer_id": "CUST-005",
+                    "name": "Pa Rizky",
+                    "email": "pa.rizky@tbw.net",
+                    "phone": "081296562013",
+                    "address": "",
+                    "package_name": "Paket Anak",
+                    "package_speed": "10 Mbps",
+                    "monthly_fee": 150000,
+                    "status": "active",
+                    "join_date": "2025-09-02",
+                    "hutang": 0,
+                    "created_at": "2025-09-02T16:30:28.905Z"
+                },
+                {
+                    "id": 5,
+                    "customer_id": "CUST-006",
+                    "name": "Pa Faisal",
+                    "email": "pa.faisal@tbw.net",
+                    "phone": "085770222733",
+                    "address": "",
+                    "package_name": "Paket Anak",
+                    "package_speed": "10 Mbps",
+                    "monthly_fee": 150000,
+                    "status": "active",
+                    "join_date": "2025-09-02",
+                    "hutang": 0,
+                    "created_at": "2025-09-02T16:30:28.905Z"
+                },
+                {
+                    "id": 6,
+                    "customer_id": "CUST-007",
+                    "name": "Pa Asep",
+                    "email": "pa.asep@tbw.net",
+                    "phone": "085920032227",
+                    "address": "",
+                    "package_name": "Paket Anak",
+                    "package_speed": "10 Mbps",
+                    "monthly_fee": 150000,
+                    "status": "active",
+                    "join_date": "2025-09-02",
+                    "hutang": 0,
+                    "created_at": "2025-09-02T16:30:28.905Z"
+                },
+                {
+                    "id": 7,
+                    "customer_id": "CUST-008",
+                    "name": "Anggia TB",
+                    "email": "anggia.tb@tbw.net",
+                    "phone": "085223125780",
+                    "address": "",
+                    "package_name": "Paket Voucher",
+                    "package_speed": "10 Mbps",
+                    "monthly_fee": 100000,
+                    "status": "active",
+                    "join_date": "2025-09-02",
+                    "hutang": 0,
+                    "created_at": "2025-09-02T16:30:28.905Z"
+                },
+                {
+                    "id": 8,
+                    "customer_id": "CUST-009",
+                    "name": "Ramdani",
+                    "email": "ramdani@tbw.net",
+                    "phone": "087712380873",
+                    "address": "",
+                    "package_name": "Paket Anak",
+                    "package_speed": "10 Mbps",
+                    "monthly_fee": 150000,
+                    "status": "active",
+                    "join_date": "2025-09-02",
+                    "hutang": 0,
+                    "created_at": "2025-09-02T16:30:28.905Z"
+                },
+                {
+                    "id": 9,
+                    "customer_id": "CUST-010",
+                    "name": "Bu Rosmawati",
+                    "email": "bu.rosmawati@tbw.net",
+                    "phone": "087850747660",
+                    "address": "",
+                    "package_name": "Paket Anak",
+                    "package_speed": "10 Mbps",
+                    "monthly_fee": 150000,
+                    "status": "active",
+                    "join_date": "2025-09-02",
+                    "hutang": 300000,
+                    "created_at": "2025-09-02T16:30:28.905Z"
+                },
+                {
+                    "id": 10,
+                    "customer_id": "CUST-011",
+                    "name": "Pa Ahmad",
+                    "email": "pa.ahmad@tbw.net",
+                    "phone": "081323658985",
+                    "address": "",
+                    "package_name": "Paket Anak",
+                    "package_speed": "10 Mbps",
+                    "monthly_fee": 150000,
+                    "status": "active",
+                    "join_date": "2025-09-02",
+                    "hutang": 0,
+                    "created_at": "2025-09-02T16:30:28.905Z"
+                },
+                {
+                    "id": 11,
+                    "customer_id": "CUST-012",
+                    "name": "Yeti",
+                    "email": "yeti@tbw.net",
+                    "phone": "085951556195",
+                    "address": "",
+                    "package_name": "Paket Keluarga",
+                    "package_speed": "10 Mbps",
+                    "monthly_fee": 200000,
+                    "status": "active",
+                    "join_date": "2025-09-02",
+                    "hutang": 200000,
+                    "created_at": "2025-09-02T16:30:28.905Z"
+                },
+                {
+                    "id": 12,
+                    "customer_id": "CUST-013",
+                    "name": "Susi",
+                    "email": "susi@tbw.net",
+                    "phone": "08773664147",
+                    "address": "",
+                    "package_name": "Paket Anak",
+                    "package_speed": "10 Mbps",
+                    "monthly_fee": 150000,
+                    "status": "active",
+                    "join_date": "2025-09-02",
+                    "hutang": 0,
+                    "created_at": "2025-09-02T16:30:28.905Z"
+                },
+                {
+                    "id": 13,
+                    "customer_id": "CUST-014",
+                    "name": "Endang",
+                    "email": "endang@tbw.net",
+                    "phone": "087844720321",
+                    "address": "",
+                    "package_name": "Paket Anak",
+                    "package_speed": "10 Mbps",
+                    "monthly_fee": 150000,
+                    "status": "active",
+                    "join_date": "2025-09-02",
+                    "hutang": 0,
+                    "created_at": "2025-09-02T16:30:28.905Z"
+                },
+                {
+                    "id": 14,
+                    "customer_id": "CUST-015",
+                    "name": "Lilip",
+                    "email": "lilip@tbw.net",
+                    "phone": "083120238470",
+                    "address": "",
+                    "package_name": "Paket Anak",
+                    "package_speed": "10 Mbps",
+                    "monthly_fee": 150000,
+                    "status": "active",
+                    "join_date": "2025-09-02",
+                    "hutang": 0,
+                    "created_at": "2025-09-02T16:30:28.905Z"
+                },
+                {
+                    "id": 15,
+                    "customer_id": "CUST-016",
+                    "name": "Bu Yoyoh",
+                    "email": "bu.yoyoh@tbw.net",
+                    "phone": "089651543687",
+                    "address": "",
+                    "package_name": "Paket Anak",
+                    "package_speed": "10 Mbps",
+                    "monthly_fee": 150000,
+                    "status": "active",
+                    "join_date": "2025-09-02",
+                    "hutang": 0,
+                    "created_at": "2025-09-02T16:30:28.905Z"
+                },
+                {
+                    "id": 16,
+                    "customer_id": "CUST-017",
+                    "name": "Bu Enur",
+                    "email": "bu.enur@tbw.net",
+                    "phone": "081248182113",
+                    "address": "",
+                    "package_name": "Paket Anak",
+                    "package_speed": "10 Mbps",
+                    "monthly_fee": 150000,
+                    "status": "active",
+                    "join_date": "2025-09-02",
+                    "hutang": 0,
+                    "created_at": "2025-09-02T16:30:28.905Z"
+                },
+                {
+                    "id": 17,
+                    "customer_id": "CUST-018",
+                    "name": "Patonah",
+                    "email": "patonah@tbw.net",
+                    "phone": "081997830939",
+                    "address": "",
+                    "package_name": "Paket Anak",
+                    "package_speed": "10 Mbps",
+                    "monthly_fee": 150000,
+                    "status": "active",
+                    "join_date": "2025-09-02",
+                    "hutang": 0,
+                    "created_at": "2025-09-02T16:30:28.905Z"
+                },
+                {
+                    "id": 18,
+                    "customer_id": "CUST-019",
+                    "name": "Iah Siti Solihah",
+                    "email": "iah.siti.solihah@tbw.net",
+                    "phone": "08996982447",
+                    "address": "",
+                    "package_name": "Paket Anak",
+                    "package_speed": "10 Mbps",
+                    "monthly_fee": 150000,
+                    "status": "active",
+                    "join_date": "2025-09-02",
+                    "hutang": 0,
+                    "created_at": "2025-09-02T16:30:28.905Z"
+                },
+                {
+                    "id": 19,
+                    "customer_id": "CUST-020",
+                    "name": "Risa Rismawati",
+                    "email": "risa.rismawati@tbw.net",
+                    "phone": "08987782521",
+                    "address": "",
+                    "package_name": "Paket Anak",
+                    "package_speed": "10 Mbps",
+                    "monthly_fee": 150000,
+                    "status": "active",
+                    "join_date": "2025-09-02",
+                    "hutang": 0,
+                    "created_at": "2025-09-02T16:30:28.905Z"
+                },
+                {
+                    "id": 20,
+                    "customer_id": "CUST-021",
+                    "name": "Pa Candra",
+                    "email": "pa.candra@tbw.net",
+                    "phone": "6281394569287",
+                    "address": "",
+                    "package_name": "Paket Anak",
+                    "package_speed": "10 Mbps",
+                    "monthly_fee": 150000,
+                    "status": "active",
+                    "join_date": "2025-09-02",
+                    "hutang": 0,
+                    "created_at": "2025-09-02T16:30:28.905Z"
+                }
+            ],
+            "packages": [
+                {
+                    "id": 1,
+                    "name": "Basic",
+                    "speed": "10 Mbps",
+                    "price": 100000,
+                    "description": "Paket internet dasar untuk kebutuhan browsing",
+                    "is_active": true,
+                    "created_at": "2025-01-01T00:00:00.000Z"
+                },
+                {
+                    "id": 2,
+                    "name": "Standard",
+                    "speed": "20 Mbps",
+                    "price": 150000,
+                    "description": "Paket internet standar untuk streaming dan gaming",
+                    "is_active": true,
+                    "created_at": "2025-01-01T00:00:00.000Z"
+                },
+                {
+                    "id": 3,
+                    "name": "Premium",
+                    "speed": "50 Mbps",
+                    "price": 200000,
+                    "description": "Paket internet premium untuk kebutuhan bisnis",
+                    "is_active": true,
+                    "created_at": "2025-01-01T00:00:00.000Z"
+                },
+                {
+                    "id": 4,
+                    "name": "Putus",
+                    "speed": "0 Mbps",
+                    "price": 0,
+                    "description": "Paket untuk pelanggan yang putus layanan, hanya menagih hutang tanpa biaya bulanan",
+                    "is_active": true,
+                    "created_at": "2025-01-01T00:00:00.000Z"
+                }
+            ],
+            "bills": [],
+            "payments": [],
+            "billing_history": []
+        };
+
+        function showStatus(message, type = 'info') {
+            const statusEl = document.getElementById('status');
+            statusEl.className = `status ${type}`;
+            statusEl.textContent = message;
+            statusEl.style.display = 'block';
+            
+            setTimeout(() => {
+                statusEl.style.display = 'none';
+            }, 5000);
+        }
+
+        function importSampleData() {
+            try {
+                localStorage.setItem('internet_billing_data', JSON.stringify(sampleData));
+                showStatus('✅ Data sample berhasil diimport! Silakan refresh halaman aplikasi.', 'success');
+            } catch (error) {
+                showStatus('❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        function viewCurrentData() {
+            const data = localStorage.getItem('internet_billing_data');
+            const previewEl = document.getElementById('dataPreview');
+            
+            if (data) {
+                const parsed = JSON.parse(data);
+                previewEl.innerHTML = `
+                    <div class="data-preview">
+                        <strong>📊 Data Saat Ini:</strong><br><br>
+                        Customers: ${parsed.customers?.length || 0}<br>
+                        Packages: ${parsed.packages?.length || 0}<br>
+                        Bills: ${parsed.bills?.length || 0}<br>
+                        Payments: ${parsed.payments?.length || 0}<br>
+                        Billing History: ${parsed.billing_history?.length || 0}<br>
+                        <br>
+                        <details>
+                            <summary style="cursor: pointer; color: #60a5fa;">Lihat JSON lengkap</summary>
+                            <pre style="margin-top: 10px;">${JSON.stringify(parsed, null, 2)}</pre>
+                        </details>
+                    </div>
+                `;
+            } else {
+                previewEl.innerHTML = `
+                    <div class="data-preview">
+                        <strong>⚠️ Belum ada data di localStorage</strong><br>
+                        Silakan import data sample terlebih dahulu.
+                    </div>
+                `;
+            }
+        }
+
+        function clearAllData() {
+            if (confirm('⚠️ Apakah Anda yakin ingin menghapus SEMUA data?\n\nData akan hilang permanen!')) {
+                localStorage.removeItem('internet_billing_data');
+                showStatus('🗑️ Semua data berhasil dihapus!', 'info');
+                document.getElementById('dataPreview').innerHTML = '';
+            }
+        }
+
+        function exportCurrentData() {
+            const data = localStorage.getItem('internet_billing_data');
+            if (data) {
+                const blob = new Blob([data], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `billing-backup-${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                showStatus('💾 Data berhasil di-export!', 'success');
+            } else {
+                showStatus('⚠️ Tidak ada data untuk di-export', 'info');
+            }
+        }
+
+        // Auto-show current data on load
+        window.addEventListener('load', () => {
+            const data = localStorage.getItem('internet_billing_data');
+            if (data) {
+                showStatus('ℹ️ Data sudah ada di localStorage. Lihat detail di bawah.', 'info');
+            }
+        });
+    </script>
+</body>
+</html>

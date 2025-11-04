@@ -104,7 +104,8 @@ const CustomerForm = ({ customer = null, onSave, onCancel, isOpen }) => {
       newErrors.package_name = 'Paket wajib dipilih';
     }
 
-    if (!formData.monthly_fee || formData.monthly_fee <= 0) {
+    // Allow 0 for "Putus" package, otherwise require > 0
+    if (formData.package_name !== 'Putus' && (!formData.monthly_fee || formData.monthly_fee <= 0)) {
       newErrors.monthly_fee = 'Biaya bulanan harus lebih dari 0';
     }
 
