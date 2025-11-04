@@ -128,8 +128,56 @@ INSERT INTO customers (name, email, phone, address, package_name, package_speed,
 ('Pa Candra', 'pa.candra@tbw.net', '6281394569287', '', 'Paket Anak', '10 Mbps', 150000, 0, 'active');
 
 -- ================================================
+-- INSERT SAMPLE BILLS (November 2025)
+-- ================================================
+
+INSERT INTO bills (bill_number, customer_id, customer_name, billing_month, billing_year, amount, previous_debt, total_amount, status, due_date) VALUES
+('BILL-2025-11-0001', 1, 'Pa Bayu', 'November', 2025, 100000, 0, 100000, 'unpaid', '2025-11-30'),
+('BILL-2025-11-0002', 2, 'Pa Ipan', 'November', 2025, 150000, 150000, 300000, 'unpaid', '2025-11-30'),
+('BILL-2025-11-0003', 3, 'Bu Siti', 'November', 2025, 150000, 0, 150000, 'unpaid', '2025-11-30'),
+('BILL-2025-11-0004', 4, 'Pa Rizky', 'November', 2025, 150000, 0, 150000, 'paid', '2025-11-30'),
+('BILL-2025-11-0005', 5, 'Pa Faisal', 'November', 2025, 150000, 0, 150000, 'unpaid', '2025-11-30'),
+('BILL-2025-11-0006', 6, 'Pa Asep', 'November', 2025, 150000, 0, 150000, 'paid', '2025-11-30'),
+('BILL-2025-11-0007', 7, 'Anggia TB', 'November', 2025, 100000, 0, 100000, 'unpaid', '2025-11-30'),
+('BILL-2025-11-0008', 8, 'Ramdani', 'November', 2025, 150000, 0, 150000, 'unpaid', '2025-11-30'),
+('BILL-2025-11-0009', 9, 'Bu Rosmawati', 'November', 2025, 150000, 300000, 450000, 'unpaid', '2025-11-30'),
+('BILL-2025-11-0010', 10, 'Pa Ahmad', 'November', 2025, 150000, 0, 150000, 'paid', '2025-11-30'),
+('BILL-2025-11-0011', 11, 'Yeti', 'November', 2025, 200000, 200000, 400000, 'unpaid', '2025-11-30'),
+('BILL-2025-11-0012', 12, 'Susi', 'November', 2025, 150000, 0, 150000, 'unpaid', '2025-11-30'),
+('BILL-2025-11-0013', 13, 'Endang', 'November', 2025, 150000, 0, 150000, 'paid', '2025-11-30'),
+('BILL-2025-11-0014', 14, 'Lilip', 'November', 2025, 150000, 0, 150000, 'unpaid', '2025-11-30'),
+('BILL-2025-11-0015', 15, 'Bu Yoyoh', 'November', 2025, 150000, 0, 150000, 'unpaid', '2025-11-30'),
+('BILL-2025-11-0016', 16, 'Bu Enur', 'November', 2025, 150000, 0, 150000, 'unpaid', '2025-11-30'),
+('BILL-2025-11-0017', 17, 'Patonah', 'November', 2025, 150000, 0, 150000, 'unpaid', '2025-11-30'),
+('BILL-2025-11-0018', 18, 'Iah Siti Solihah', 'November', 2025, 150000, 0, 150000, 'unpaid', '2025-11-30'),
+('BILL-2025-11-0019', 19, 'Risa Rismawati', 'November', 2025, 150000, 0, 150000, 'paid', '2025-11-30'),
+('BILL-2025-11-0020', 20, 'Pa Candra', 'November', 2025, 150000, 0, 150000, 'unpaid', '2025-11-30');
+
+-- ================================================
+-- INSERT SAMPLE PAYMENTS (for paid bills)
+-- ================================================
+
+INSERT INTO payments (bill_id, customer_id, amount, payment_method, notes) VALUES
+(4, 4, 150000, 'cash', 'Pembayaran tagihan November 2025'),
+(6, 6, 150000, 'transfer', 'Transfer BCA'),
+(10, 10, 150000, 'cash', 'Lunas'),
+(13, 13, 150000, 'cash', 'Pembayaran cash'),
+(19, 19, 150000, 'transfer', 'Transfer Mandiri');
+
+-- ================================================
 -- VERIFICATION QUERIES
 -- ================================================
+
+-- Check bills count
+SELECT 'Bills Count' as info, COUNT(*) as total FROM bills;
+
+-- Check bills by status
+SELECT 'Bills by Status' as info, status, COUNT(*) as total 
+FROM bills 
+GROUP BY status;
+
+-- Check payments count
+SELECT 'Payments Count' as info, COUNT(*) as total FROM payments;
 
 -- Check packages count
 SELECT 'Packages Count' as info, COUNT(*) as total FROM packages;
