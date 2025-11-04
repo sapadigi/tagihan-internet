@@ -102,6 +102,143 @@ const CustomerDebtModal = ({ customer, onClose, onDebtUpdated }) => {
   );
 };
 
+// Compensation Modal Component
+const CompensationModal = ({ bill, onClose, onCompensationUpdated }) => {
+  const [compensation, setCompensation] = useState(bill?.compensation || 0);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setCompensation(bill?.compensation || 0);
+  }, [bill]);
+
+  const handleUpdateCompensation = async () => {
+    setLoading(true);
+    try {
+      const compensationValue = parseFloat(compensation) || 0;
+      
+      // Calculate new total: amount + previous_debt - compensation
+      const newTotal = (bill.amount || 0) + (bill.previous_debt || 0) - compensationValue;
+      
+      // Calculate new remaining amount (total - paid)
+      const currentPaidAmount = bill.paid_amount || 0;
+      const newRemainingAmount = newTotal - currentPaidAmount;
+      
+      const updatedBillData = {
+        ...bill,
+        compensation: compensationValue,
+        total_amount: newTotal,
+        remaining_amount: Math.max(0, newRemainingAmount),
+        status: newRemainingAmount <= 0 ? 'paid' : (currentPaidAmount > 0 ? 'partial' : 'unpaid')
+      };
+      
+      const { error } = await billingService.updateBill(bill.id, updatedBillData);
+      if (error) {
+        console.error('Error updating compensation:', error);
+        alert('Gagal mengubah kompensasi');
+      } else {
+        alert('Kompensasi berhasil diupdate');
+        onCompensationUpdated();
+      }
+    } catch (err) {
+      console.error('Error updating compensation:', err);
+      alert('Gagal mengubah kompensasi');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    })?.format(amount);
+  };
+
+  const calculateNewTotal = () => {
+    const compensationValue = parseFloat(compensation) || 0;
+    return (bill?.amount || 0) + (bill?.previous_debt || 0) - compensationValue;
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+        <h3 className="text-lg font-semibold mb-4">Kelola Kompensasi Tagihan</h3>
+        
+        <div className="mb-4">
+          <p className="text-sm text-gray-600 mb-2">Nomor Tagihan:</p>
+          <p className="font-medium">{bill?.bill_number}</p>
+        </div>
+        
+        <div className="mb-4">
+          <p className="text-sm text-gray-600 mb-2">Pelanggan:</p>
+          <p className="font-medium">{bill?.customer_name}</p>
+        </div>
+        
+        <div className="mb-4 grid grid-cols-2 gap-4">
+          <div>
+            <p className="text-sm text-gray-600">Jumlah Tagihan:</p>
+            <p className="font-medium">{formatCurrency(bill?.amount || 0)}</p>
+          </div>
+          <div>
+            <p className="text-sm text-gray-600">Hutang:</p>
+            <p className="font-medium text-red-600">{formatCurrency(bill?.previous_debt || 0)}</p>
+          </div>
+        </div>
+        
+        <div className="mb-4">
+          <p className="text-sm text-gray-600 mb-2">Kompensasi Saat Ini:</p>
+          <p className="font-medium text-blue-600">{formatCurrency(bill?.compensation || 0)}</p>
+        </div>
+        
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Kompensasi Baru (IDR)
+          </label>
+          <Input
+            type="number"
+            value={compensation}
+            onChange={(e) => setCompensation(e.target.value)}
+            placeholder="Masukkan jumlah kompensasi..."
+            min="0"
+            step="1000"
+          />
+          <p className="text-xs text-gray-500 mt-1">
+            Preview: {formatCurrency(parseFloat(compensation) || 0)}
+          </p>
+        </div>
+        
+        <div className="mb-6 bg-gray-50 p-3 rounded">
+          <p className="text-sm text-gray-600 mb-1">Total Tagihan Baru:</p>
+          <p className="text-lg font-bold text-green-600">{formatCurrency(calculateNewTotal())}</p>
+          <p className="text-xs text-gray-500 mt-1">
+            ({formatCurrency(bill?.amount || 0)} + {formatCurrency(bill?.previous_debt || 0)} - {formatCurrency(parseFloat(compensation) || 0)})
+          </p>
+        </div>
+        
+        <div className="flex space-x-3">
+          <Button
+            variant="outline"
+            className="flex-1"
+            onClick={onClose}
+            disabled={loading}
+          >
+            Batal
+          </Button>
+          <Button
+            className="flex-1"
+            onClick={handleUpdateCompensation}
+            disabled={loading}
+          >
+            {loading ? 'Menyimpan...' : 'Update Kompensasi'}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const BillingPage = () => {
   const [bills, setBills] = useState([]);
   const [customers, setCustomers] = useState([]);
@@ -132,6 +269,8 @@ const BillingPage = () => {
   const [showBulkWhatsAppModal, setShowBulkWhatsAppModal] = useState(false);
   const [showCustomerDebtModal, setShowCustomerDebtModal] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [showCompensationModal, setShowCompensationModal] = useState(false);
+  const [selectedBillForCompensation, setSelectedBillForCompensation] = useState(null);
 
   useEffect(() => {
     loadBills();
@@ -298,6 +437,18 @@ const BillingPage = () => {
     loadCustomerDebtStats();
     setShowCustomerDebtModal(false);
     setSelectedCustomer(null);
+  };
+
+  const handleManageCompensation = (bill) => {
+    setSelectedBillForCompensation(bill);
+    setShowCompensationModal(true);
+  };
+
+  const handleCompensationUpdated = () => {
+    loadBills();
+    loadStats();
+    setShowCompensationModal(false);
+    setSelectedBillForCompensation(null);
   };
 
   const getStatusBadge = (status) => {
@@ -578,28 +729,25 @@ const BillingPage = () => {
                 <thead className="bg-muted">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                      Nomor Tagihan
+                      No Tagihan
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                      Pelanggan
+                      Nama Pelanggan
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                      Hutang Pelanggan
+                      Jumlah Tagihan
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                      Jumlah Hutang
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                      Kompensasi
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       Periode
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                      Jatuh Tempo
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                      Total
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                      Terbayar
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                      Sisa
+                      Total Tagihan
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       Status
@@ -612,24 +760,36 @@ const BillingPage = () => {
                 <tbody className="bg-card divide-y divide-border">
                   {bills.map((bill) => (
                     <tr key={bill.id} className="hover:bg-muted/50">
+                      {/* No Tagihan */}
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-foreground">
                           {bill.bill_number}
                         </div>
                       </td>
+                      
+                      {/* Nama Pelanggan */}
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-foreground">
-                          {bill.customers?.name}
+                        <div className="text-sm text-foreground font-medium">
+                          {bill.customer_name || bill.customers?.name}
                         </div>
-                        <div className="text-sm text-muted-foreground">
-                          {bill.customers?.customer_id}
+                        <div className="text-xs text-muted-foreground">
+                          {bill.customers?.phone}
                         </div>
                       </td>
+                      
+                      {/* Jumlah Tagihan (biaya bulanan) */}
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium text-foreground">
+                          {formatCurrency(bill.amount || 0)}
+                        </div>
+                      </td>
+                      
+                      {/* Jumlah Hutang (hutang bulan lalu) */}
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium">
-                          {bill.customers?.hutang && bill.customers.hutang > 0 ? (
+                          {bill.previous_debt && bill.previous_debt > 0 ? (
                             <span className="text-red-600">
-                              {formatCurrency(bill.customers.hutang)}
+                              {formatCurrency(bill.previous_debt)}
                             </span>
                           ) : (
                             <span className="text-green-600">
@@ -637,55 +797,59 @@ const BillingPage = () => {
                             </span>
                           )}
                         </div>
-                        {bill.customers?.hutang && bill.customers.hutang > 0 && (
-                          <div className="text-xs text-red-500">
-                            Ada tunggakan
+                      </td>
+                      
+                      {/* Kompensasi */}
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium">
+                          {bill.compensation && bill.compensation > 0 ? (
+                            <span className="text-blue-600">
+                              -{formatCurrency(bill.compensation)}
+                            </span>
+                          ) : (
+                            <span className="text-muted-foreground">
+                              {formatCurrency(0)}
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      
+                      {/* Periode */}
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-foreground">
+                          {bill.billing_month} {bill.billing_year}
+                        </div>
+                        {bill.due_date && (
+                          <div className="text-xs text-muted-foreground">
+                            Jatuh tempo: {formatDate(bill.due_date)}
                           </div>
                         )}
                       </td>
+                      
+                      {/* Total Tagihan (jumlah + hutang) */}
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-foreground">
-                          {formatDate(bill.billing_period_start)} - {formatDate(bill.billing_period_end)}
+                        <div className="text-sm font-bold text-foreground">
+                          {formatCurrency(bill.total_amount || 0)}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-foreground">
-                          {formatDate(bill.due_date)}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-foreground">
-                          {formatCurrency(bill.total_amount)}
-                        </div>
-                        {bill.previous_debt > 0 && (
-                          <div className="text-xs text-red-600">
-                            Hutang: {formatCurrency(bill.previous_debt)}
-                          </div>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-green-600">
-                          {formatCurrency(bill.paid_amount)}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-red-600">
-                          {formatCurrency(bill.remaining_amount)}
-                        </div>
-                      </td>
+                      
+                      {/* Status */}
                       <td className="px-6 py-4 whitespace-nowrap">
                         {getStatusBadge(bill.status)}
                       </td>
+                      
+                      {/* Aksi */}
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex space-x-2">
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handleViewBill(bill)}
+                            onClick={() => handleManageCompensation(bill)}
+                            className="bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
                           >
-                            Detail
+                            Kelola Kompensasi
                           </Button>
-                          {bill.customers?.hutang && bill.customers.hutang > 0 && (
+                          {bill.customers?.hutang > 0 && (
                             <Button
                               variant="outline"
                               size="sm"
@@ -784,6 +948,17 @@ const BillingPage = () => {
             setSelectedCustomer(null);
           }}
           onDebtUpdated={handleCustomerDebtUpdated}
+        />
+      )}
+
+      {showCompensationModal && selectedBillForCompensation && (
+        <CompensationModal
+          bill={selectedBillForCompensation}
+          onClose={() => {
+            setShowCompensationModal(false);
+            setSelectedBillForCompensation(null);
+          }}
+          onCompensationUpdated={handleCompensationUpdated}
         />
       )}
     </div>

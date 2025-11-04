@@ -414,24 +414,37 @@ const FieldBilling = () => {
                   {/* Amount Info */}
                   <div className="bg-gray-50 rounded-lg p-3 mb-3">
                     <div className="flex justify-between items-center mb-2">
-                      <span className="text-gray-600">Tagihan Ini:</span>
+                      <span className="text-gray-600">Tagihan Hari Ini:</span>
                       <span className="font-semibold">{formatCurrency(bill.amount)}</span>
                     </div>
-                    {bill.paid_amount > 0 && (
+                    {bill.previous_debt > 0 && (
                       <div className="flex justify-between items-center mb-2">
-                        <span className="text-gray-600">Sudah Dibayar:</span>
-                        <span className="text-green-600">{formatCurrency(bill.paid_amount)}</span>
+                        <span className="text-gray-600">Tagihan Sebelumnya:</span>
+                        <span className="text-orange-600">{formatCurrency(bill.previous_debt)}</span>
                       </div>
                     )}
-                    {customerDebt.totalDebt > 0 && (
+                    {bill.compensation > 0 && (
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-gray-600">Kompensasi Gangguan:</span>
+                        <span className="text-green-600">-{formatCurrency(bill.compensation)}</span>
+                      </div>
+                    )}
+                    <div className="border-t pt-2 mt-2">
+                      <div className="flex justify-between items-center font-bold">
+                        <span className="text-gray-800">Total Pembayaran:</span>
+                        <span className="text-blue-600">{formatCurrency(bill.total_amount)}</span>
+                      </div>
+                    </div>
+                    {bill.paid_amount > 0 && (
                       <div className="border-t pt-2 mt-2">
-                        <div className="flex justify-between items-center font-bold text-sm">
-                          <span className="text-orange-600">Total Hutang Customer:</span>
-                          <span className="text-orange-600">{formatCurrency(customerDebt.totalDebt)}</span>
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="text-gray-600 text-sm">Sudah Dibayar:</span>
+                          <span className="text-green-600 text-sm">{formatCurrency(bill.paid_amount)}</span>
                         </div>
-                        <p className="text-xs text-gray-500 mt-1">
-                          Data dari field hutang customer
-                        </p>
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-600 text-sm font-medium">Sisa Tagihan:</span>
+                          <span className="text-red-600 text-sm font-medium">{formatCurrency(bill.remaining_amount)}</span>
+                        </div>
                       </div>
                     )}
                   </div>

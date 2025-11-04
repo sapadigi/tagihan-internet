@@ -85,8 +85,8 @@ export const billingService = {
       
       console.log('📋 Generating bills for:', monthName, year)
       
-      // Calculate billing period
-      const dueDate = new Date(year, month + 1, 0) // End of the month
+      // Calculate billing period - jatuh tempo tanggal 5 di bulan ini
+      const dueDate = new Date(year, month, 5) // Tanggal 5 bulan ini
 
       // Get all active customers using storageAdapter
       const { data: customers, error: customersError } = await storageAdapter.getCustomers()
@@ -137,7 +137,8 @@ export const billingService = {
         // Previous debt comes from customer.hutang field
         const previousDebt = customer.hutang || 0
         const monthlyFee = customer.monthly_fee || 0
-        const totalBillAmount = monthlyFee + previousDebt
+        const compensation = 0 // Default 0, bisa diubah nanti via edit
+        const totalBillAmount = monthlyFee + previousDebt - compensation
 
         // Generate bill number - update allExistingBills array to prevent duplicates
         const billNumber = this.generateBillNumber(billingDate, allExistingBills || [])
@@ -156,7 +157,10 @@ export const billingService = {
           due_date: dueDate.toISOString().split('T')[0],
           amount: monthlyFee,
           previous_debt: previousDebt,
+          compensation: compensation,
           total_amount: totalBillAmount,
+          paid_amount: 0,
+          remaining_amount: totalBillAmount,
           status: 'unpaid'
         }
 
@@ -218,30 +222,34 @@ export const billingService = {
   // Record a payment
   async recordPayment(paymentData, sendWhatsAppNotification = true) {
     try {
-      // Get the bill
-      const bills = jsonStorage.select(TABLES.BILLS, { 
-        filters: { id: paymentData.bill_id } 
-      })
+      // Get the bill from database
+      const { data: bills, error: billError } = await storageAdapter.getBills()
+      
+      if (billError) {
+        throw new Error('Failed to get bills: ' + billError)
+      }
 
-      if (bills.length === 0) {
+      const bill = bills?.find(b => b.id === paymentData.bill_id)
+      
+      if (!bill) {
         throw new Error('Bill not found')
       }
 
-      const bill = bills[0]
+      // Get customer from database
+      const { data: customers, error: customerError } = await storageAdapter.getCustomers()
+      
+      if (customerError) {
+        throw new Error('Failed to get customers: ' + customerError)
+      }
 
-      // Get customer
-      const customers = jsonStorage.select(TABLES.CUSTOMERS, {
-        filters: { id: bill.customer_id }
-      })
-
-      const customer = customers.length > 0 ? customers[0] : null
+      const customer = customers?.find(c => c.id === bill.customer_id)
 
       // Generate payment number
       const paymentDate = paymentData.payment_date || new Date().toISOString()
       const paymentNumber = this.generatePaymentNumber(paymentDate)
 
-      // Create payment
-      const [payment] = jsonStorage.insert(TABLES.PAYMENTS, {
+      // Create payment in database
+      const paymentRecord = {
         payment_number: paymentNumber,
         bill_id: paymentData.bill_id,
         customer_id: bill.customer_id,
@@ -251,18 +259,33 @@ export const billingService = {
         reference_number: paymentData.reference_number,
         notes: paymentData.notes,
         created_by: paymentData.created_by || 'admin'
-      })
+      }
 
-      // Update bill
+      const { data: payment, error: paymentError } = await storageAdapter.createPayment(paymentRecord)
+      
+      if (paymentError) {
+        throw new Error('Failed to create payment: ' + paymentError)
+      }
+
+      // Calculate new payment amounts
+      // Note: total_amount already includes compensation (amount + previous_debt - compensation)
       const newPaidAmount = (bill.paid_amount || 0) + paymentData.amount
-      const newRemainingAmount = (bill.remaining_amount || bill.total_amount) - paymentData.amount
+      const newRemainingAmount = (bill.total_amount || 0) - newPaidAmount
 
-      jsonStorage.update(TABLES.BILLS, paymentData.bill_id, {
+      // Update bill status
+      const updatedBillData = {
+        ...bill,
         paid_amount: newPaidAmount,
         remaining_amount: Math.max(0, newRemainingAmount),
         status: newRemainingAmount <= 0 ? 'paid' : (newPaidAmount > 0 ? 'partial' : bill.status),
         payment_date: newRemainingAmount <= 0 ? new Date().toISOString() : bill.payment_date
-      })
+      }
+
+      const { error: updateError } = await storageAdapter.updateBill(paymentData.bill_id, updatedBillData)
+      
+      if (updateError) {
+        console.error('Failed to update bill:', updateError)
+      }
 
       // Send WhatsApp payment confirmation (if enabled and phone available)
       let whatsappResult = null
@@ -314,8 +337,8 @@ export const billingService = {
         paidBills: filteredBills.filter(b => b.status === 'paid').length,
         partialBills: filteredBills.filter(b => b.status === 'partial').length,
         totalAmount: filteredBills.reduce((sum, b) => sum + (b.total_amount || 0), 0),
-        totalPaid: filteredBills.reduce((sum, b) => sum + (b.amount - (b.previous_debt || 0)), 0),
-        totalOutstanding: filteredBills.filter(b => b.status === 'unpaid').reduce((sum, b) => sum + (b.total_amount || 0), 0)
+        totalPaid: filteredBills.reduce((sum, b) => sum + (b.paid_amount || 0), 0),
+        totalOutstanding: filteredBills.filter(b => b.status !== 'paid').reduce((sum, b) => sum + (b.amount || 0), 0)
       }
 
       return { data: stats, error: null }
@@ -392,6 +415,22 @@ export const billingService = {
       return { data, error: null }
     } catch (error) {
       console.error('Error updating bill status:', error)
+      return { data: null, error: error.message }
+    }
+  },
+
+  // Update bill (for compensation, amount, etc.)
+  async updateBill(billId, billData) {
+    try {
+      const { data, error } = await storageAdapter.updateBill(billId, billData)
+      
+      if (error) {
+        throw new Error(error)
+      }
+
+      return { data, error: null }
+    } catch (error) {
+      console.error('Error updating bill:', error)
       return { data: null, error: error.message }
     }
   }

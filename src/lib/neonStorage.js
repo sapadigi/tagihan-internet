@@ -200,9 +200,13 @@ class NeonStorage {
           bills.billing_year,
           bills.amount,
           bills.previous_debt,
+          bills.compensation,
           bills.total_amount,
+          bills.paid_amount,
+          bills.remaining_amount,
           bills.status,
           bills.due_date,
+          bills.payment_date,
           bills.created_at,
           customers.name,
           customers.phone,
@@ -257,9 +261,13 @@ class NeonStorage {
         billing_year: row.billing_year,
         amount: row.amount,
         previous_debt: row.previous_debt,
+        compensation: row.compensation || 0,
         total_amount: row.total_amount,
+        paid_amount: row.paid_amount || 0,
+        remaining_amount: row.remaining_amount || row.total_amount,
         status: row.status,
         due_date: row.due_date,
+        payment_date: row.payment_date,
         created_at: row.created_at,
         // Nest customer data in 'customers' object for compatibility
         customers: row.name ? {
@@ -294,7 +302,8 @@ class NeonStorage {
         INSERT INTO bills (
           bill_number, customer_id, customer_name,
           billing_month, billing_year, amount,
-          previous_debt, total_amount, status, due_date
+          previous_debt, compensation, total_amount, 
+          paid_amount, remaining_amount, status, due_date
         )
         VALUES (
           ${billData.bill_number},
@@ -304,7 +313,10 @@ class NeonStorage {
           ${billData.billing_year},
           ${billData.amount},
           ${billData.previous_debt || 0},
+          ${billData.compensation || 0},
           ${billData.total_amount},
+          ${billData.paid_amount || 0},
+          ${billData.remaining_amount || billData.total_amount},
           ${billData.status || 'unpaid'},
           ${billData.due_date}
         )
@@ -326,8 +338,12 @@ class NeonStorage {
         SET 
           status = ${billData.status},
           amount = ${billData.amount},
-          previous_debt = ${billData.previous_debt},
+          previous_debt = ${billData.previous_debt || 0},
+          compensation = ${billData.compensation || 0},
           total_amount = ${billData.total_amount},
+          paid_amount = ${billData.paid_amount || 0},
+          remaining_amount = ${billData.remaining_amount || 0},
+          payment_date = ${billData.payment_date || null},
           due_date = ${billData.due_date}
         WHERE id = ${id}
         RETURNING *

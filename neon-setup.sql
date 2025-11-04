@@ -51,9 +51,13 @@ CREATE TABLE bills (
     billing_year INTEGER NOT NULL,
     amount INTEGER NOT NULL,
     previous_debt INTEGER DEFAULT 0,
+    compensation INTEGER DEFAULT 0,
     total_amount INTEGER NOT NULL,
+    paid_amount INTEGER DEFAULT 0,
+    remaining_amount INTEGER DEFAULT 0,
     status VARCHAR(50) DEFAULT 'unpaid',
     due_date DATE,
+    payment_date TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -131,27 +135,27 @@ INSERT INTO customers (name, email, phone, address, package_name, package_speed,
 -- INSERT SAMPLE BILLS (November 2025)
 -- ================================================
 
-INSERT INTO bills (bill_number, customer_id, customer_name, billing_month, billing_year, amount, previous_debt, total_amount, status, due_date) VALUES
-('BILL-2025-11-0001', 1, 'Pa Bayu', 'November', 2025, 100000, 0, 100000, 'unpaid', '2025-11-30'),
-('BILL-2025-11-0002', 2, 'Pa Ipan', 'November', 2025, 150000, 150000, 300000, 'unpaid', '2025-11-30'),
-('BILL-2025-11-0003', 3, 'Bu Siti', 'November', 2025, 150000, 0, 150000, 'unpaid', '2025-11-30'),
-('BILL-2025-11-0004', 4, 'Pa Rizky', 'November', 2025, 150000, 0, 150000, 'paid', '2025-11-30'),
-('BILL-2025-11-0005', 5, 'Pa Faisal', 'November', 2025, 150000, 0, 150000, 'unpaid', '2025-11-30'),
-('BILL-2025-11-0006', 6, 'Pa Asep', 'November', 2025, 150000, 0, 150000, 'paid', '2025-11-30'),
-('BILL-2025-11-0007', 7, 'Anggia TB', 'November', 2025, 100000, 0, 100000, 'unpaid', '2025-11-30'),
-('BILL-2025-11-0008', 8, 'Ramdani', 'November', 2025, 150000, 0, 150000, 'unpaid', '2025-11-30'),
-('BILL-2025-11-0009', 9, 'Bu Rosmawati', 'November', 2025, 150000, 300000, 450000, 'unpaid', '2025-11-30'),
-('BILL-2025-11-0010', 10, 'Pa Ahmad', 'November', 2025, 150000, 0, 150000, 'paid', '2025-11-30'),
-('BILL-2025-11-0011', 11, 'Yeti', 'November', 2025, 200000, 200000, 400000, 'unpaid', '2025-11-30'),
-('BILL-2025-11-0012', 12, 'Susi', 'November', 2025, 150000, 0, 150000, 'unpaid', '2025-11-30'),
-('BILL-2025-11-0013', 13, 'Endang', 'November', 2025, 150000, 0, 150000, 'paid', '2025-11-30'),
-('BILL-2025-11-0014', 14, 'Lilip', 'November', 2025, 150000, 0, 150000, 'unpaid', '2025-11-30'),
-('BILL-2025-11-0015', 15, 'Bu Yoyoh', 'November', 2025, 150000, 0, 150000, 'unpaid', '2025-11-30'),
-('BILL-2025-11-0016', 16, 'Bu Enur', 'November', 2025, 150000, 0, 150000, 'unpaid', '2025-11-30'),
-('BILL-2025-11-0017', 17, 'Patonah', 'November', 2025, 150000, 0, 150000, 'unpaid', '2025-11-30'),
-('BILL-2025-11-0018', 18, 'Iah Siti Solihah', 'November', 2025, 150000, 0, 150000, 'unpaid', '2025-11-30'),
-('BILL-2025-11-0019', 19, 'Risa Rismawati', 'November', 2025, 150000, 0, 150000, 'paid', '2025-11-30'),
-('BILL-2025-11-0020', 20, 'Pa Candra', 'November', 2025, 150000, 0, 150000, 'unpaid', '2025-11-30');
+INSERT INTO bills (bill_number, customer_id, customer_name, billing_month, billing_year, amount, previous_debt, compensation, total_amount, status, due_date) VALUES
+('BILL-2025-11-0001', 1, 'Pa Bayu', 'November', 2025, 100000, 0, 0, 100000, 'unpaid', '2025-11-30'),
+('BILL-2025-11-0002', 2, 'Pa Ipan', 'November', 2025, 150000, 150000, 0, 300000, 'unpaid', '2025-11-30'),
+('BILL-2025-11-0003', 3, 'Bu Siti', 'November', 2025, 150000, 0, 0, 150000, 'unpaid', '2025-11-30'),
+('BILL-2025-11-0004', 4, 'Pa Rizky', 'November', 2025, 150000, 0, 0, 150000, 'paid', '2025-11-30'),
+('BILL-2025-11-0005', 5, 'Pa Faisal', 'November', 2025, 150000, 0, 0, 150000, 'unpaid', '2025-11-30'),
+('BILL-2025-11-0006', 6, 'Pa Asep', 'November', 2025, 150000, 0, 0, 150000, 'paid', '2025-11-30'),
+('BILL-2025-11-0007', 7, 'Anggia TB', 'November', 2025, 100000, 0, 0, 100000, 'unpaid', '2025-11-30'),
+('BILL-2025-11-0008', 8, 'Ramdani', 'November', 2025, 150000, 0, 0, 150000, 'unpaid', '2025-11-30'),
+('BILL-2025-11-0009', 9, 'Bu Rosmawati', 'November', 2025, 150000, 300000, 0, 450000, 'unpaid', '2025-11-30'),
+('BILL-2025-11-0010', 10, 'Pa Ahmad', 'November', 2025, 150000, 0, 0, 150000, 'paid', '2025-11-30'),
+('BILL-2025-11-0011', 11, 'Yeti', 'November', 2025, 200000, 200000, 0, 400000, 'unpaid', '2025-11-30'),
+('BILL-2025-11-0012', 12, 'Susi', 'November', 2025, 150000, 0, 0, 150000, 'unpaid', '2025-11-30'),
+('BILL-2025-11-0013', 13, 'Endang', 'November', 2025, 150000, 0, 0, 150000, 'paid', '2025-11-30'),
+('BILL-2025-11-0014', 14, 'Lilip', 'November', 2025, 150000, 0, 0, 150000, 'unpaid', '2025-11-30'),
+('BILL-2025-11-0015', 15, 'Bu Yoyoh', 'November', 2025, 150000, 0, 0, 150000, 'unpaid', '2025-11-30'),
+('BILL-2025-11-0016', 16, 'Bu Enur', 'November', 2025, 150000, 0, 0, 150000, 'unpaid', '2025-11-30'),
+('BILL-2025-11-0017', 17, 'Patonah', 'November', 2025, 150000, 0, 0, 150000, 'unpaid', '2025-11-30'),
+('BILL-2025-11-0018', 18, 'Iah Siti Solihah', 'November', 2025, 150000, 0, 0, 150000, 'unpaid', '2025-11-30'),
+('BILL-2025-11-0019', 19, 'Risa Rismawati', 'November', 2025, 150000, 0, 0, 150000, 'paid', '2025-11-30'),
+('BILL-2025-11-0020', 20, 'Pa Candra', 'November', 2025, 150000, 0, 0, 150000, 'unpaid', '2025-11-30');
 
 -- ================================================
 -- INSERT SAMPLE PAYMENTS (for paid bills)

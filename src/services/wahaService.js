@@ -180,9 +180,9 @@ _Pesan ini dikirim otomatis oleh Bot_
 👤 Pelanggan Yth. ${customer.name}
 📞 *No. HP:* ${customer.phone || '-'}
 💸 Jumlah Tagihan: ${formatCurrency(bill.amount)}
-🕔 Status Pembayaran: ${bill.status === 'paid' ? 'Lunas' : 'Belum Lunas'}
-
 💸 Tagihan Sebelumnya: ${formatCurrency(customer.hutang || 0)}
+${bill.compensation && bill.compensation > 0 ? `💰 Kompensasi Gangguan: -${formatCurrency(bill.compensation)}\n` : ''}💸 Total Tagihan: ${formatCurrency(bill.total_amount || (bill.amount + (customer.hutang || 0)))}
+🕔 Status Pembayaran: ${bill.status === 'paid' ? 'Lunas' : 'Belum Lunas'}
 
 💡 *Cara Pembayaran:*
 1. Transfer ke *Dana* 0851 7991 5187 a/n Toni Setiawan
