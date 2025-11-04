@@ -35,6 +35,7 @@ CREATE TABLE customers (
     package_name VARCHAR(100),
     package_speed VARCHAR(50),
     monthly_fee INTEGER NOT NULL,
+    hutang INTEGER DEFAULT 0,
     status VARCHAR(50) DEFAULT 'active',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -104,27 +105,27 @@ INSERT INTO packages (name, speed, price, description, is_active) VALUES
 -- INSERT SAMPLE CUSTOMERS (20 customers from JSON storage)
 -- ================================================
 
-INSERT INTO customers (name, email, phone, address, package_name, package_speed, monthly_fee, status) VALUES
-('Pa Bayu', 'pa.bayu@tbw.net', '08129695655', '', 'Paket Voucher', '10 Mbps', 100000, 'active'),
-('Pa Ipan', 'pa.ipan@tbw.net', '081313071917', '', 'Paket Anak', '10 Mbps', 150000, 'active'),
-('Bu Siti', 'bu.siti@tbw.net', '088220787016', '', 'Paket Anak', '10 Mbps', 150000, 'active'),
-('Pa Rizky', 'pa.rizky@tbw.net', '081296562013', '', 'Paket Anak', '10 Mbps', 150000, 'active'),
-('Pa Faisal', 'pa.faisal@tbw.net', '085770222733', '', 'Paket Anak', '10 Mbps', 150000, 'active'),
-('Pa Asep', 'pa.asep@tbw.net', '085920032227', '', 'Paket Anak', '10 Mbps', 150000, 'active'),
-('Anggia TB', 'anggia.tb@tbw.net', '085223125780', '', 'Paket Voucher', '10 Mbps', 100000, 'active'),
-('Ramdani', 'ramdani@tbw.net', '087712380873', '', 'Paket Anak', '10 Mbps', 150000, 'active'),
-('Bu Rosmawati', 'bu.rosmawati@tbw.net', '087850747660', '', 'Paket Anak', '10 Mbps', 150000, 'active'),
-('Pa Ahmad', 'pa.ahmad@tbw.net', '081323658985', '', 'Paket Anak', '10 Mbps', 150000, 'active'),
-('Yeti', 'yeti@tbw.net', '085951556195', '', 'Paket Keluarga', '10 Mbps', 200000, 'active'),
-('Susi', 'susi@tbw.net', '08773664147', '', 'Paket Anak', '10 Mbps', 150000, 'active'),
-('Endang', 'endang@tbw.net', '087844720321', '', 'Paket Anak', '10 Mbps', 150000, 'active'),
-('Lilip', 'lilip@tbw.net', '083120238470', '', 'Paket Anak', '10 Mbps', 150000, 'active'),
-('Bu Yoyoh', 'bu.yoyoh@tbw.net', '089651543687', '', 'Paket Anak', '10 Mbps', 150000, 'active'),
-('Bu Enur', 'bu.enur@tbw.net', '081248182113', '', 'Paket Anak', '10 Mbps', 150000, 'active'),
-('Patonah', 'patonah@tbw.net', '081997830939', '', 'Paket Anak', '10 Mbps', 150000, 'active'),
-('Iah Siti Solihah', 'iah.siti.solihah@tbw.net', '08996982447', '', 'Paket Anak', '10 Mbps', 150000, 'active'),
-('Risa Rismawati', 'risa.rismawati@tbw.net', '08987782521', '', 'Paket Anak', '10 Mbps', 150000, 'active'),
-('Pa Candra', 'pa.candra@tbw.net', '6281394569287', '', 'Paket Anak', '10 Mbps', 150000, 'active');
+INSERT INTO customers (name, email, phone, address, package_name, package_speed, monthly_fee, hutang, status) VALUES
+('Pa Bayu', 'pa.bayu@tbw.net', '08129695655', '', 'Paket Voucher', '10 Mbps', 100000, 0, 'active'),
+('Pa Ipan', 'pa.ipan@tbw.net', '081313071917', '', 'Paket Anak', '10 Mbps', 150000, 150000, 'active'),
+('Bu Siti', 'bu.siti@tbw.net', '088220787016', '', 'Paket Anak', '10 Mbps', 150000, 0, 'active'),
+('Pa Rizky', 'pa.rizky@tbw.net', '081296562013', '', 'Paket Anak', '10 Mbps', 150000, 0, 'active'),
+('Pa Faisal', 'pa.faisal@tbw.net', '085770222733', '', 'Paket Anak', '10 Mbps', 150000, 0, 'active'),
+('Pa Asep', 'pa.asep@tbw.net', '085920032227', '', 'Paket Anak', '10 Mbps', 150000, 0, 'active'),
+('Anggia TB', 'anggia.tb@tbw.net', '085223125780', '', 'Paket Voucher', '10 Mbps', 100000, 0, 'active'),
+('Ramdani', 'ramdani@tbw.net', '087712380873', '', 'Paket Anak', '10 Mbps', 150000, 0, 'active'),
+('Bu Rosmawati', 'bu.rosmawati@tbw.net', '087850747660', '', 'Paket Anak', '10 Mbps', 150000, 300000, 'active'),
+('Pa Ahmad', 'pa.ahmad@tbw.net', '081323658985', '', 'Paket Anak', '10 Mbps', 150000, 0, 'active'),
+('Yeti', 'yeti@tbw.net', '085951556195', '', 'Paket Keluarga', '10 Mbps', 200000, 200000, 'active'),
+('Susi', 'susi@tbw.net', '08773664147', '', 'Paket Anak', '10 Mbps', 150000, 0, 'active'),
+('Endang', 'endang@tbw.net', '087844720321', '', 'Paket Anak', '10 Mbps', 150000, 0, 'active'),
+('Lilip', 'lilip@tbw.net', '083120238470', '', 'Paket Anak', '10 Mbps', 150000, 0, 'active'),
+('Bu Yoyoh', 'bu.yoyoh@tbw.net', '089651543687', '', 'Paket Anak', '10 Mbps', 150000, 0, 'active'),
+('Bu Enur', 'bu.enur@tbw.net', '081248182113', '', 'Paket Anak', '10 Mbps', 150000, 0, 'active'),
+('Patonah', 'patonah@tbw.net', '081997830939', '', 'Paket Anak', '10 Mbps', 150000, 0, 'active'),
+('Iah Siti Solihah', 'iah.siti.solihah@tbw.net', '08996982447', '', 'Paket Anak', '10 Mbps', 150000, 0, 'active'),
+('Risa Rismawati', 'risa.rismawati@tbw.net', '08987782521', '', 'Paket Anak', '10 Mbps', 150000, 0, 'active'),
+('Pa Candra', 'pa.candra@tbw.net', '6281394569287', '', 'Paket Anak', '10 Mbps', 150000, 0, 'active');
 
 -- ================================================
 -- VERIFICATION QUERIES
@@ -146,6 +147,12 @@ SELECT 'Customers by Package' as info, package_name, COUNT(*) as total
 FROM customers 
 GROUP BY package_name
 ORDER BY total DESC;
+
+-- Check customers with debt (hutang)
+SELECT 'Customers with Debt' as info, name, hutang 
+FROM customers 
+WHERE hutang > 0
+ORDER BY hutang DESC;
 
 -- Show all packages
 SELECT * FROM packages ORDER BY price;
