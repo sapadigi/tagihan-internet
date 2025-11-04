@@ -176,16 +176,28 @@ class NeonStorage {
   
   async getBills(filters = {}) {
     try {
-      let query = 'SELECT * FROM bills WHERE 1=1';
+      // Use SQL JOIN to get customer data with bills
+      let query = `
+        SELECT 
+          bills.*,
+          customers.name as customer_name,
+          customers.phone as customer_phone,
+          customers.email as customer_email,
+          customers.package_name,
+          customers.hutang as customer_hutang
+        FROM bills
+        LEFT JOIN customers ON bills.customer_id = customers.id
+        WHERE 1=1
+      `;
       const params = [];
 
       if (filters.customer_id) {
-        query += ` AND customer_id = $${params.length + 1}`;
+        query += ` AND bills.customer_id = $${params.length + 1}`;
         params.push(filters.customer_id);
       }
 
-      if (filters.status) {
-        query += ` AND status = $${params.length + 1}`;
+      if (filters.status && filters.status !== 'all') {
+        query += ` AND bills.status = $${params.length + 1}`;
         params.push(filters.status);
       }
 
